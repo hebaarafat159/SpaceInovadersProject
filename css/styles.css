@@ -42,10 +42,16 @@
   
 
   /*  Game grid css  */
+  
   .grid-wrapper { 
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(7, 10vmin);
+    grid-template-rows: repeat(6, 10vmin);
+    gap: 2vmin;
+
+    /* display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: center; */
   }
   
   .grid {

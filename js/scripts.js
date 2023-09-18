@@ -19,6 +19,15 @@ function init() {
             this.currentPosition = startingPosition;
         }
 
+        /**
+         * 
+         * this function used to move elements by hidding its image from the current position, 
+         * increase or decrease the current position and finaly show the element on it's new 
+         * position on the grid. 
+         * 
+         * @param {*} movingDirection // which direction should the element move to (Left | Right | Up | Down). \
+         * it should be one of 'MOVENETS_KEYS' constant values.
+         */
         moveElement(movingDirection){
             this.hideFromGrid(this.currentPosition);
             switch(movingDirection){
@@ -106,12 +115,14 @@ function init() {
     /*----- EVENT LISTENERS listeners -----*/
 
     document.addEventListener('keyup', handleMovement);
-    document.querySelector('body').addEventListener('keyup', handleMovement);
 
     /*----- FUNCTIONS -----*/
    
-    // Create grid cells
-    function initGrid()
+    /**
+     * this function calculate each cell width and height, create them 
+     * and appends them to the game main grid.
+     */
+    function renderGrid()
     {
         // Use the cellCpint to create our grid cells
         for(let i = 0; i < cellCount; i++)
@@ -122,7 +133,6 @@ function init() {
            
             // Add index as attribute
             cell.dataset.index = i;
-            cell.dataset.data = null;
             // cell.setAttribute('data-index', i);
             cell.style.height = `${100/height}%`;
             cell.style.width = `${100/width}%`;
@@ -132,54 +142,72 @@ function init() {
         }
     }
    
+    /**
+     * this function calculates player starting posotion 
+     * and creates player object with the initial values
+     */
+    function renderPlayer(){
+         // calculate player starting position
+         const playerStartPosition = (cellCount - width) + (height/2) ;
+         player = new Player(playerStartPosition);
+         player.showInGrid();
+    }
+
+
+    /**
+     * this function create and display aliens list in the row, 
+     * after it calculate it's starting position. 
+     * @param {*} numberOfAliens // number of aliens shoould be displayed in the window.
+     */
+    function renderAliens(numberOfAliens){
+        // calculate number of aliens in each row.
+
+        // create array list of Alien objects.
+        
+        // calulate each alien object startposition.
+    }
+
+    /**
+     * this function is called by start game button and
+     * it generates new game grid and initialize and render all the grid components.
+     */
     function startGame(){
         // create new grid view
-        initGrid();
+        renderGrid();
 
-        // init and add it's starting position.
-        // const playerStartPosition = if((cellCount/2) === 0) ? (cellCount/2) : (cellCount/2 + 1);
-        const playerStartPosition = cellCount/2;
-        player = new Player(playerStartPosition);
-        player.showInGrid();
+        // initialize player object and calculate it's first position.
+        renderPlayer();
 
-        // add many of aliens in random positions.
+        //TODO add many of aliens in random positions.
 
-        // hide play again button and start game button.
 
-        // reset score value.
+        //TODO hide play again button and start game button.
+
+        //TODO reset score value.
     }
 
     function handleMovement(event){
        
-        // removeElementFromGrid(currentPosition);
         const pressedKey = event.keyCode;
         console.log(pressedKey);
        
         switch(pressedKey){
             
-            case MOVENETS_KEYS.UP_KEY_CODE:
-                console.log("UP");
-                player.moveElement(MOVENETS_KEYS.RIGHT_KEY_CODE);
-                break;
-            case MOVENETS_KEYS.DOWN_KEY_CODE:
-                console.log("DOWN");
-                player.moveElement(MOVENETS_KEYS.RIGHT_KEY_CODE);
-                break;
+            // case MOVENETS_KEYS.UP_KEY_CODE:
+            //     console.log("UP");
+            //     player.moveElement(MOVENETS_KEYS.RIGHT_KEY_CODE);
+            //     break;
+            // case MOVENETS_KEYS.DOWN_KEY_CODE:
+            //     console.log("DOWN");
+            //     player.moveElement(MOVENETS_KEYS.RIGHT_KEY_CODE);
+            //     break;
             case MOVENETS_KEYS.RIGHT_KEY_CODE:
-                console.log("RIGHT");
-                player.moveElement(MOVENETS_KEYS.RIGHT_KEY_CODE);  
-                break;
             case MOVENETS_KEYS.LEFT_KEY_CODE:
-                console.log("LEFT");
-                player.moveElement(MOVENETS_KEYS.LEFT_KEY_CODE);
+                player.moveElement(pressedKey);
                 break;
             case MOVENETS_KEYS.SPACE_KEY_CODE:
                 player.bolt.shoot();
                 console.log('shooooooooooot');
-                break;
-            default:
-                // remove from cell only 
-                player.moveElement(-1);
                 break;
         }
     }
