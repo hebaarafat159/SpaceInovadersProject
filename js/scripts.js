@@ -107,7 +107,6 @@ function init() {
 
     // create grid
     const grid = document.querySelector('.grid');
-    const startButton = document.
 
     /*----- EVENT LISTENERS listeners -----*/
 
