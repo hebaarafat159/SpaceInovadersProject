@@ -89,8 +89,6 @@ function init() {
         }
     }
 
-    
-
     /*----- STATE VARIABLES -----*/
 
     // gird Config
