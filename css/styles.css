@@ -1,15 +1,48 @@
 * {
     box-sizing: border-box;
   }
+
   
-  body {
-    height: 100vh;
-    margin: 0;
+  /*  generale css  */
+  body{
+    height: 100vh;  
+    margin: 0; 
+    font-family: 'Open Sans', sans-serif;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
   }
   
+  .game-window{
+    margin: 20px;
+    height: 70vh;
+  }
+
+
+
+  /*  header and score css  */
+  header{
+    font-size: 4vmin;
+    color: darkgray;
+    letter-spacing: 1vmin;
+  }
+
+  .score-wrapper{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: gray;
+    font-size: 3vmin;
+  }
   
-  .grid-wrapper {
-    height: 100vh;
+  .score-wrapper > div {
+    margin: 10px auto;
+  }
+  
+
+  /*  Game grid css  */
+  .grid-wrapper { 
     display: flex;
     justify-content: center;
     align-items: center;
@@ -17,10 +50,10 @@
   
   .grid {
     align-items: center;
-    box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2);
+    /* box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2); */
     display: flex;
     flex-wrap: wrap;
-    height: 100%;
+    /* height: 100%; */
     justify-content: center;
     height: 600px;
     width: 600px;
@@ -31,9 +64,58 @@
     flex-grow: 1;
   }
   
-  .grid div.cat {
-    background-image: url('../assets/cat.png');
+
+  /*  elements css : spaceship, alien, bum, bolt */
+
+  .grid div.spaceship {
+    /* background-image: url('../assets/cat.png'); */
+    border: 2px dotted transparent ;
+    background-color: green;
     background-repeat: no-repeat;
     background-size: contain;
     cursor: pointer;
+  }
+
+  .grid div.alien {
+    /* background-image: url('../assets/cat.png'); */
+    border: 2px dotted transparent ;
+    background-color: blue;
+    background-repeat: no-repeat;
+    background-size: contain;
+    cursor: pointer;
+  }
+
+  .grid div.bum {
+    /* background-image: url('../assets/cat.png'); */
+    border: 2px dotted transparent ;
+    border-radius: 50%;
+    background-color: black;
+    background-repeat: no-repeat;
+    background-size: contain;
+    cursor: pointer;
+  }
+
+  .grid div.bolt {
+    /* background-image: url('../assets/cat.png'); */
+    border: 2px dotted gray;
+    background-color: gray;
+    background-repeat: no-repeat;
+    background-size: contain;
+    cursor: pointer;
+  }
+
+
+  /*  Buttons css  */
+  button{
+    margin-top: 4vmin;
+    padding: 2vmin;
+    font-size: 2vmin;
+    border-radius: 4vmin;
+    border: 0.1vmin solid gray;
+    color: gray;
+  }
+
+  button:hover{
+      color: white;
+      background-color: darkgray;
   }

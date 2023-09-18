@@ -1,30 +1,38 @@
 function init() {
 
-    // ! Variables & Elements
-    // ? Elements
-    // create grid
-    const grid = document.querySelector('.grid');
+    /*----- CONSTANTS -----*/
 
-    // ? variables
-    // Board Config
-    const width = 10;
-    const height = 10;
-    const cellCount = width * height;
-    // let cells = [];
-    // {
+      // start config
+      const startingPosition = 0;
+      let currentPosition = startingPosition;
+  
+    // movements keys
+    // const MOVENETS_KEYS{
     //     UP_KEY_CODE: 38,
     //     const DOWN_KEY_CODE = 40;
     //     const RIGHT_KEY_CODE = 39;
     //     const LEFT_KEY_CODE = 37;
     // }
-    
 
-    // start config
-    const startingPosition = 0;
-    let currentPosition = startingPosition;
+    /*----- STATE VARIABLES -----*/
 
-    // ! FUNCTIONS
-     // Create grid cells
+    // Board Config
+    const width = 10;
+    const height = 10;
+    const cellCount = width * height;
+   
+     // create grid
+     const grid = document.querySelector('.grid');
+
+    /*----- EVENT LISTENERS listeners -----*/
+
+    document.addEventListener('keyup', handleMovement);
+    document.querySelector('body').addEventListener('keyup', handleMovement);
+
+
+    /*----- FUNCTIONS -----*/
+   
+    // Create grid cells
     function createGrid()
     {
         // Use the cellCpint to create our grid cells
@@ -45,28 +53,25 @@ function init() {
             // cells.push(cell);
         }
 
-        // Add cat image to starting position
-        // console.log(cells);
-        addCat(startingPosition);
+       // add game elements in start positions       
+       addElementOnGrid(startingPosition);
     }
 
-    function addCat(position)
+    function addElementOnGrid(position)
     {
         const cellView = document.querySelector(`.grid > div:nth-child(${position + 1})`);   
-        cellView.classList.add('cat');
+        cellView.classList.add('spaceship');
     }
 
-    function removeCat(position)
+    function removeElementFromGrid(position)
     {
         const cellView = document.querySelector(`.grid > div:nth-child(${position + 1})`);
-        cellView.classList.remove('cat');
+        cellView.classList.remove('spaceship');
     }
 
     function handleMovement(event){
-        // console.log(event);
-        // console.log(event.keyCode);
-
-        removeCat(currentPosition);
+       
+        removeElementFromGrid(currentPosition);
         const pressedKey = event.keyCode;
         const UP_KEY_CODE = 38;
         const DOWN_KEY_CODE = 40;
@@ -97,18 +102,17 @@ function init() {
                 }
                 break;
             default:
-                removeCat(currentPosition);
+                removeElementFromGrid(currentPosition);
                 break;
         }
 
         // Add current position
-        addCat(currentPosition)
+        addElementOnGrid(currentPosition)
     }
    
-    // ! EVENT
-    document.addEventListener('keyup', handleMovement);
-
-    // ! functions calls
+   
+  
+    // start the game callFunction
     createGrid();
     
 }
