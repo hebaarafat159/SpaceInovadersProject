@@ -14,7 +14,6 @@ function init() {
     class Element {
         constructor(src, startingPosition){
             this.src = src;
-            console.log('Element: ' + src);
             this.startingPosition = startingPosition;
             this.currentPosition = startingPosition;
         }
@@ -76,7 +75,6 @@ function init() {
     class Player extends Element{
         constructor(startingPosition){
             super('spaceship', startingPosition);
-            console.log('Player: ' + this.src);
             this.bolt = new Bolt(this.currentPosition+1);
         }
     }
@@ -92,9 +90,8 @@ function init() {
     }
 
     class Alien extends Element{
-        constructor(startingPosition,index){
+        constructor(startingPosition){
             super('alien', startingPosition);
-            this.index = index;
         }
     }
 
@@ -110,7 +107,7 @@ function init() {
 
     // create grid
     const grid = document.querySelector('.grid');
-
+    const startButton = document.
 
     /*----- EVENT LISTENERS listeners -----*/
 
@@ -157,14 +154,30 @@ function init() {
     /**
      * this function create and display aliens list in the row, 
      * after it calculate it's starting position. 
-     * @param {*} numberOfAliens // number of aliens shoould be displayed in the window.
+     * @param {*} totalAlientNumber // number of aliens shoould be displayed in the window.
      */
-    function renderAliens(numberOfAliens){
+    function renderAliens(totalAlientNumber){
         // calculate number of aliens in each row.
-
+        let position = 0;
+        let randomPsotion = 0; 
         // create array list of Alien objects.
-        
-        // calulate each alien object startposition.
+        for(let i=0; i < totalAlientNumber; i++)
+        {
+            randomPsotion = Math.floor(Math.random() * (width-1))
+            position =  randomPsotion + (((height/2) -1 )* height); // (width - randomPsotion);
+            console.log(`Random Position : ${randomPsotion}`);
+            aliens.push(new Alien(position));
+        }
+
+        displayAliens(aliens);
+    }
+
+
+    function displayAliens(aliensArray)
+    {
+        aliensArray.map(alien => {
+            alien.showInGrid();
+        });
     }
 
     /**
@@ -178,8 +191,11 @@ function init() {
         // initialize player object and calculate it's first position.
         renderPlayer();
 
-        //TODO add many of aliens in random positions.
-
+        // add many of aliens in random positions.
+        // TODO change this calculation
+        let totalAlientNumber = (height/2);
+        console.log("Aliens : " + totalAlientNumber);
+        renderAliens(totalAlientNumber);
 
         //TODO hide play again button and start game button.
 
