@@ -15,7 +15,7 @@ function init() {
         constructor(src, startingPosition){
             this.src = src;
             this.startingPosition = startingPosition;
-            this.currentPosition = startingPosition;
+            this.currentPosition = this.startingPosition;
         }
 
         /**
@@ -31,25 +31,30 @@ function init() {
             this.hideFromGrid(this.currentPosition);
             switch(movingDirection){
                 case MOVENETS_KEYS.UP_KEY_CODE:
-                    console.log("Element UP");
-                    this.currentPosition -= width;
+                    if(this.currentPosition > width)
+                    {
+                        this.currentPosition -= width;
+                        console.log("Element UP : " + this.currentPosition);
+                    }
                     break;
                 case MOVENETS_KEYS.DOWN_KEY_CODE:
-                    console.log("Element DOWN");
-                    this.currentPosition += width;
+                    if(this.currentPosition < cellCount-width)
+                    {
+                        this.currentPosition += width;
+                    }   
                     break;
                 case MOVENETS_KEYS.RIGHT_KEY_CODE:
-                    if(this.currentPosition % width !== (width-1))
+                    if(this.currentPosition % width < (width-1))
                     {
-                        console.log("Element RIGHT");
                         this.currentPosition++;
+                        console.log("Element RIGHT : " + this.currentPosition % width );
                     }
                     break;
                 case MOVENETS_KEYS.LEFT_KEY_CODE:
-                    if(this.currentPosition % width !== 0)
-                    {
-                        console.log("Element LEFT");
+                    if(this.currentPosition % width > 0)
+                    { 
                         this.currentPosition--;
+                        console.log("Element LEFT : " + this.currentPosition % width);
                     }
                     break;
                 default:
@@ -61,13 +66,13 @@ function init() {
 
         showInGrid()
         {
-            const cellView = document.querySelector(`.grid > div:nth-child(${this.currentPosition})`);
+            const cellView = document.querySelector(`.grid > div:nth-child(${this.currentPosition+1})`);
             cellView.classList.add(this.src);
         }
     
         hideFromGrid(position, element)
         {
-            const cellView = document.querySelector(`.grid > div:nth-child(${this.currentPosition})`);
+            const cellView = document.querySelector(`.grid > div:nth-child(${this.currentPosition+1})`);
             cellView.classList.remove(this.src);
         }
     }
@@ -75,7 +80,8 @@ function init() {
     class Player extends Element{
         constructor(startingPosition){
             super('spaceship', startingPosition);
-            this.bolt = new Bolt(this.currentPosition+1);
+            this.bolt = new Bolt(this.currentPosition);
+            // console.log(`Payer Starting position: ${this.startingPosition} and current position : ${this.currentPosition}`);
         }
     }
 
@@ -85,16 +91,41 @@ function init() {
         }
 
         shoot(){
-            this.moveElement(MOVENETS_KEYS.UP_KEY_CODE);
+            while(this.currentPosition > width)
+            {
+                this.moveElement(MOVENETS_KEYS.UP_KEY_CODE);
+            }
         }
     }
 
     class Alien extends Element{
         constructor(startingPosition){
             super('alien', startingPosition);
+            this.bum = null;
+        }
+
+        moveDown(){
+            this.moveElement(MOVENETS_KEYS.DOWN_KEY_CODE);
+        }
+
+        dropBum(){
+            this.bum = new Bum(this.currentPosition);
+            this.bum.drop();
         }
     }
 
+    class Bum extends Element{
+        constructor(startingPosition){
+            super('bum', startingPosition);
+        }
+
+        drop(){
+            while(this.currentPosition < (cellCount-width))
+            {
+                this.moveElement(MOVENETS_KEYS.DOWN_KEY_CODE);
+            }
+        }
+    }
     /*----- STATE VARIABLES -----*/
 
     // gird Config
@@ -104,14 +135,17 @@ function init() {
 
     const aliens = [];
     let player = null;
+    let score = 0;
 
     // create grid
     const grid = document.querySelector('.grid');
+    const buttons = document.querySelectorAll('button');
 
     /*----- EVENT LISTENERS listeners -----*/
 
     document.addEventListener('keyup', handleMovement);
-
+    buttons.forEach((button) => button.addEventListener('click', startGame));
+    
     /*----- FUNCTIONS -----*/
    
     /**
@@ -179,26 +213,35 @@ function init() {
         });
     }
 
+
+    function resetGameVariabes(){
+        const aliens = [];
+        let player = null;
+        let score = 0;    
+    }
+
     /**
      * this function is called by start game button and
      * it generates new game grid and initialize and render all the grid components.
      */
     function startGame(){
+        // reset variables
+        resetGameVariabes();
+
         // create new grid view
         renderGrid();
 
         // initialize player object and calculate it's first position.
         renderPlayer();
 
-        // add many of aliens in random positions.
-        // TODO change this calculation
+        // change this calculation
         let totalAlientNumber = (height/2);
         console.log("Aliens : " + totalAlientNumber);
         renderAliens(totalAlientNumber);
 
-        //TODO hide play again button and start game button.
-
-        //TODO reset score value.
+        // hide play again button and start game button.
+        buttons.forEach((element => element.style.visibility = 'hidden'));
+       
     }
 
     function handleMovement(event){
@@ -208,14 +251,16 @@ function init() {
        
         switch(pressedKey){
             
-            // case MOVENETS_KEYS.UP_KEY_CODE:
-            //     console.log("UP");
-            //     player.moveElement(MOVENETS_KEYS.RIGHT_KEY_CODE);
-            //     break;
-            // case MOVENETS_KEYS.DOWN_KEY_CODE:
-            //     console.log("DOWN");
-            //     player.moveElement(MOVENETS_KEYS.RIGHT_KEY_CODE);
-            //     break;
+            case MOVENETS_KEYS.UP_KEY_CODE:
+                console.log("UP");
+                player.bolt.moveElement(MOVENETS_KEYS.UP_KEY_CODE);
+                break;
+            case MOVENETS_KEYS.DOWN_KEY_CODE:
+                console.log("DOWN");
+                console.log(aliens);
+                aliens.forEach((alien) => alien.moveDown());
+                aliens[2].dropBum();
+                break;
             case MOVENETS_KEYS.RIGHT_KEY_CODE:
             case MOVENETS_KEYS.LEFT_KEY_CODE:
                 player.moveElement(pressedKey);
@@ -229,6 +274,5 @@ function init() {
 
     startGame();
 }
-
 
 window.addEventListener('DOMContentLoaded', init)
