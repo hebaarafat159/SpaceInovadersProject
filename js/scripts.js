@@ -10,7 +10,16 @@ function init() {
         SPACE_KEY_CODE : 32
     };
 
-    // start config
+    const DROP_DUM_TIME_INTERVAL = 1000;
+    const SHOOT_BOLT_TIME_INTERVAL = 1000;
+    const MOVING_ALIEN_DOWN_TIME_INTERVAL = 1000;
+
+    // init timmers
+    // TODO set timmer to move aliens down.
+    let aliensTimmer = setInterval(startAliensTimmer, MOVING_ALIEN_DOWN_TIME_INTERVAL);
+    // let dropBumTimmer = setInterval(startAliensTimmer, MOVING_ALIEN_DOWN_TIME_INTERVAL);
+    let shootBoltTimmer = setInterval(startShootBoltTimmer, MOVING_ALIEN_DOWN_TIME_INTERVAL);
+
     class Element {
         constructor(src, startingPosition){
             this.src = src;
@@ -34,7 +43,6 @@ function init() {
                     if(this.currentPosition > width)
                     {
                         this.currentPosition -= width;
-                        console.log("Element UP : " + this.currentPosition);
                     }
                     break;
                 case MOVENETS_KEYS.DOWN_KEY_CODE:
@@ -47,14 +55,12 @@ function init() {
                     if(this.currentPosition % width < (width-1))
                     {
                         this.currentPosition++;
-                        console.log("Element RIGHT : " + this.currentPosition % width );
                     }
                     break;
                 case MOVENETS_KEYS.LEFT_KEY_CODE:
                     if(this.currentPosition % width > 0)
                     { 
                         this.currentPosition--;
-                        console.log("Element LEFT : " + this.currentPosition % width);
                     }
                     break;
                 default:
@@ -80,21 +86,18 @@ function init() {
     class Player extends Element{
         constructor(startingPosition){
             super('spaceship', startingPosition);
-            this.bolt = new Bolt(this.currentPosition);
-            // console.log(`Payer Starting position: ${this.startingPosition} and current position : ${this.currentPosition}`);
+            this.bolt = null;//new Bolt(this.currentPosition);
+        }
+        shoot(){
+            if(this.bolt === null)
+                this.bolt = new Bolt(this.currentPosition);
+            this.bolt.moveElement(MOVENETS_KEYS.UP_KEY_CODE);
         }
     }
 
     class Bolt extends Element{
         constructor(startingPosition){
             super('bolt', startingPosition);
-        }
-
-        shoot(){
-            while(this.currentPosition > width)
-            {
-                this.moveElement(MOVENETS_KEYS.UP_KEY_CODE);
-            }
         }
     }
 
@@ -128,14 +131,14 @@ function init() {
     }
     /*----- STATE VARIABLES -----*/
 
+    const aliens = [];
+    let player = null;
+    let score = 0;
+
     // gird Config
     const width = 10;
     const height = 10;
     const cellCount = width * height;
-
-    const aliens = [];
-    let player = null;
-    let score = 0;
 
     // create grid
     const grid = document.querySelector('.grid');
@@ -197,12 +200,15 @@ function init() {
         for(let i=0; i < totalAlientNumber; i++)
         {
             randomPsotion = Math.floor(Math.random() * (width-1))
-            position =  randomPsotion + (((height/2) -1 )* height); // (width - randomPsotion);
-            console.log(`Random Position : ${randomPsotion}`);
+            position =  randomPsotion + (((height/2) -1 )* height);
             aliens.push(new Alien(position));
         }
 
         displayAliens(aliens);
+
+        // TODO set timmer to move aliens down.
+    
+        // Todo set timmer to drop a bum.
     }
 
 
@@ -236,19 +242,16 @@ function init() {
 
         // change this calculation
         let totalAlientNumber = (height/2);
-        console.log("Aliens : " + totalAlientNumber);
         renderAliens(totalAlientNumber);
 
         // hide play again button and start game button.
         buttons.forEach((element => element.style.visibility = 'hidden'));
-       
     }
 
     function handleMovement(event){
        
         const pressedKey = event.keyCode;
-        console.log(pressedKey);
-       
+        
         switch(pressedKey){
             
             case MOVENETS_KEYS.UP_KEY_CODE:
@@ -257,22 +260,55 @@ function init() {
                 break;
             case MOVENETS_KEYS.DOWN_KEY_CODE:
                 console.log("DOWN");
-                console.log(aliens);
-                aliens.forEach((alien) => alien.moveDown());
-                aliens[2].dropBum();
+                stopAllTimers();
                 break;
             case MOVENETS_KEYS.RIGHT_KEY_CODE:
             case MOVENETS_KEYS.LEFT_KEY_CODE:
                 player.moveElement(pressedKey);
                 break;
             case MOVENETS_KEYS.SPACE_KEY_CODE:
-                player.bolt.shoot();
                 console.log('shooooooooooot');
+                shootBoltTimmer = setInterval(startShootBoltTimmer, MOVING_ALIEN_DOWN_TIME_INTERVAL);
                 break;
         }
     }
 
     startGame();
+
+
+    // init timmers
+    // TODO set timmer to move aliens down.
+    aliensTimmer = setInterval(startAliensTimmer, MOVING_ALIEN_DOWN_TIME_INTERVAL);
+    // let dropBumTimmer = setInterval(startAliensTimmer, MOVING_ALIEN_DOWN_TIME_INTERVAL);
+    // let shootBoltTimmer = setInterval(startShootBoltTimmer, MOVING_ALIEN_DOWN_TIME_INTERVAL);
+
+    // start timmers
+    function startAliensTimmer() {
+            aliens.forEach((alien) => alien.moveDown());
+    }
+
+    function startShootBoltTimmer() {
+        player.shoot();
+    }
+    
+    // stop timmers
+    function stopAllTimers(){
+        clearAliensTimmer();
+       // clearDropBumTimmer();
+        clearShootBoltTimmer();
+    }
+
+    function clearAliensTimmer(){
+            clearInterval(aliensTimmer);
+    }
+    
+    function clearDropBumTimmer(){
+        clearInterval(dropBumTimmer);
+    }
+
+    function clearShootBoltTimmer(){
+        clearInterval(shootBoltTimmer);
+    }
 }
 
 window.addEventListener('DOMContentLoaded', init)
