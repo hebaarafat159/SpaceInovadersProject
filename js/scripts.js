@@ -13,7 +13,7 @@ function init() {
     const DROP_DUM_TIME_INTERVAL = 50000;
     const DROP_MOVING_TIME_INTERVAL = 5000;
     const SHOOT_BOLT_TIME_INTERVAL = 1000;
-    const MOVING_ALIEN_DOWN_TIME_INTERVAL = 1000;
+    const MOVING_ALIEN_DOWN_TIME_INTERVAL = 5000;
 
     // init timmers
     // TODO set timmer to move aliens down.
@@ -278,7 +278,7 @@ function init() {
     // init timmers
     // TODO set timmer to move aliens down.
     aliensTimmer = setInterval(startAliensTimmer, MOVING_ALIEN_DOWN_TIME_INTERVAL);
-    dropBumTimmer = setInterval(startDropBumTimmer,DROP_MOVING_TIME_INTERVAL);
+    dropBumTimmer = setInterval(startDropBumTimmer,DROP_DUM_TIME_INTERVAL);
     // start timmers
     function startAliensTimmer() {
             aliens.forEach((alien) => alien.moveDown());
