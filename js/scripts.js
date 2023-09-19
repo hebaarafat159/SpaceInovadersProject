@@ -10,8 +10,8 @@ function init() {
         SPACE_KEY_CODE : 32
     };
 
-    const DROP_DUM_TIME_INTERVAL = 50000;
-    const DROP_MOVING_TIME_INTERVAL = 5000;
+    const DROP_DUM_TIME_INTERVAL = 1000;
+    const DROP_MOVING_TIME_INTERVAL = 500;
     const SHOOT_BOLT_TIME_INTERVAL = 1000;
     const MOVING_ALIEN_DOWN_TIME_INTERVAL = 5000;
 
@@ -114,14 +114,19 @@ function init() {
         }
 
         movingBum(){
-            if( this.bum === null)
+            if( this.bum === null || this.bum === undefined)
+            {
                 this.bum = new Bum(this.currentPosition);
+                console.log(`the bum current location ${this.bum.currentPosition}`);
+            }
+            console.log(this.bum);
             this.bum.moveElement(MOVENETS_KEYS.DOWN_KEY_CODE);  
         }
 
-        dropBum(){
-            bumMovingTimmer = setInterval(this.movingBum,bumMovingTimmer);
-        }
+        // dropBum(){
+        //     // bumMovingTimmer = setInterval(this.movingBum,DROP_MOVING_TIME_INTERVAL);
+        //     // this.movingBum();
+        // }
     }
 
     class Bum extends Element{
@@ -207,7 +212,10 @@ function init() {
         displayAliens(aliens);
 
         // TODO set timmer to move aliens down.
-    
+        // init timmers
+        // aliensTimmer = setInterval(startAliensTimmer, MOVING_ALIEN_DOWN_TIME_INTERVAL);
+        dropBumTimmer = setInterval(startDropBumTimmer,DROP_DUM_TIME_INTERVAL);
+        startDropBumTimmer();
         // Todo set timmer to drop a bum.
     }
 
@@ -274,11 +282,6 @@ function init() {
 
     startGame();
 
-
-    // init timmers
-    // TODO set timmer to move aliens down.
-    aliensTimmer = setInterval(startAliensTimmer, MOVING_ALIEN_DOWN_TIME_INTERVAL);
-    dropBumTimmer = setInterval(startDropBumTimmer,DROP_DUM_TIME_INTERVAL);
     // start timmers
     function startAliensTimmer() {
             aliens.forEach((alien) => alien.moveDown());
@@ -291,7 +294,8 @@ function init() {
     function startDropBumTimmer() {
         let selectRandemAlienIndex = Math.floor(Math.random() * (aliens.length))
         let selectedAlien = aliens[selectRandemAlienIndex];
-        selectedAlien.dropBum();
+        console.log(`selected Index : ${selectRandemAlienIndex} , alient object : ${selectedAlien.currentPosition}` );
+        selectedAlien.movingBum();
     }
 
     // stop timmers
