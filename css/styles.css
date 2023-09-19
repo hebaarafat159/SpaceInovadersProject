@@ -49,9 +49,9 @@
     grid-template-rows: repeat(6, 10vmin);
     gap: 2vmin;
 
-    /* display: flex;
-    justify-content: center;
-    align-items: center; */
+    /* display: flex; */
+    /* justify-content: center; */
+    /* align-items: center; */
   }
   
   .grid {
@@ -74,37 +74,36 @@
   /*  elements css : spaceship, alien, bum, bolt */
 
   .grid div.spaceship {
-    /* background-image: url('../assets/cat.png'); */
-    border: 2px dotted transparent ;
-    background-color: green;
+    background-image: url('../assets/spaceship.png');
+    /* border: 2px dotted transparent ; */
+    /* background-color: green; */
     background-repeat: no-repeat;
     background-size: contain;
     cursor: pointer;
   }
 
   .grid div.alien {
-    /* background-image: url('../assets/cat.png'); */
-    border: 2px dotted transparent ;
-    background-color: blue;
+    background-image: url('../assets/alien.png');
+    /* border: 2px dotted transparent ; */
+    /* background-color: blue; */
     background-repeat: no-repeat;
     background-size: contain;
     cursor: pointer;
   }
 
   .grid div.bum {
-    /* background-image: url('../assets/cat.png'); */
-    border: 2px dotted transparent ;
-    border-radius: 50%;
-    background-color: black;
+    background-image: url('../assets/bum.png');
+    /* border: 2px dotted transparent ; */
+    /* border-radius: 50%; */
+    /* background-color: black; */
     background-repeat: no-repeat;
     background-size: contain;
     cursor: pointer;
   }
 
   .grid div.bolt {
-    /* background-image: url('../assets/cat.png'); */
-    border: 2px dotted gray;
-    background-color: gray;
+    border:  5px  dotted gray;
+    /* background-color: gray; */
     background-repeat: no-repeat;
     background-size: contain;
     cursor: pointer;
