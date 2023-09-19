@@ -10,15 +10,17 @@ function init() {
         SPACE_KEY_CODE : 32
     };
 
-    const DROP_DUM_TIME_INTERVAL = 1000;
+    const DROP_DUM_TIME_INTERVAL = 50000;
+    const DROP_MOVING_TIME_INTERVAL = 5000;
     const SHOOT_BOLT_TIME_INTERVAL = 1000;
     const MOVING_ALIEN_DOWN_TIME_INTERVAL = 1000;
 
     // init timmers
     // TODO set timmer to move aliens down.
-    let aliensTimmer = setInterval(startAliensTimmer, MOVING_ALIEN_DOWN_TIME_INTERVAL);
-    // let dropBumTimmer = setInterval(startAliensTimmer, MOVING_ALIEN_DOWN_TIME_INTERVAL);
-    let shootBoltTimmer = setInterval(startShootBoltTimmer, MOVING_ALIEN_DOWN_TIME_INTERVAL);
+    let aliensTimmer = null;//setInterval(startAliensTimmer, MOVING_ALIEN_DOWN_TIME_INTERVAL);
+    let dropBumTimmer = null;//setInterval(startDropBumTimmer, DROP_DUM_TIME_INTERVAL);
+    let shootBoltTimmer = null;
+    let bumMovingTimmer = null;
 
     class Element {
         constructor(src, startingPosition){
@@ -111,22 +113,20 @@ function init() {
             this.moveElement(MOVENETS_KEYS.DOWN_KEY_CODE);
         }
 
+        movingBum(){
+            if( this.bum === null)
+                this.bum = new Bum(this.currentPosition);
+            this.bum.moveElement(MOVENETS_KEYS.DOWN_KEY_CODE);  
+        }
+
         dropBum(){
-            this.bum = new Bum(this.currentPosition);
-            this.bum.drop();
+            bumMovingTimmer = setInterval(this.movingBum,bumMovingTimmer);
         }
     }
 
     class Bum extends Element{
         constructor(startingPosition){
             super('bum', startingPosition);
-        }
-
-        drop(){
-            while(this.currentPosition < (cellCount-width))
-            {
-                this.moveElement(MOVENETS_KEYS.DOWN_KEY_CODE);
-            }
         }
     }
     /*----- STATE VARIABLES -----*/
@@ -219,7 +219,6 @@ function init() {
         });
     }
 
-
     function resetGameVariabes(){
         const aliens = [];
         let player = null;
@@ -268,7 +267,7 @@ function init() {
                 break;
             case MOVENETS_KEYS.SPACE_KEY_CODE:
                 console.log('shooooooooooot');
-                shootBoltTimmer = setInterval(startShootBoltTimmer, MOVING_ALIEN_DOWN_TIME_INTERVAL);
+                shootBoltTimmer = setInterval(startShootBoltTimmer, SHOOT_BOLT_TIME_INTERVAL);
                 break;
         }
     }
@@ -279,9 +278,7 @@ function init() {
     // init timmers
     // TODO set timmer to move aliens down.
     aliensTimmer = setInterval(startAliensTimmer, MOVING_ALIEN_DOWN_TIME_INTERVAL);
-    // let dropBumTimmer = setInterval(startAliensTimmer, MOVING_ALIEN_DOWN_TIME_INTERVAL);
-    // let shootBoltTimmer = setInterval(startShootBoltTimmer, MOVING_ALIEN_DOWN_TIME_INTERVAL);
-
+    dropBumTimmer = setInterval(startDropBumTimmer,DROP_MOVING_TIME_INTERVAL);
     // start timmers
     function startAliensTimmer() {
             aliens.forEach((alien) => alien.moveDown());
@@ -291,23 +288,38 @@ function init() {
         player.shoot();
     }
     
+    function startDropBumTimmer() {
+        let selectRandemAlienIndex = Math.floor(Math.random() * (aliens.length))
+        let selectedAlien = aliens[selectRandemAlienIndex];
+        selectedAlien.dropBum();
+    }
+
     // stop timmers
     function stopAllTimers(){
         clearAliensTimmer();
-       // clearDropBumTimmer();
+        clearDropBumTimmer();
         clearShootBoltTimmer();
+        clearMovingBumTimmer();
     }
 
     function clearAliensTimmer(){
+        if(aliensTimmer!==null)
             clearInterval(aliensTimmer);
     }
     
     function clearDropBumTimmer(){
-        clearInterval(dropBumTimmer);
+        if(dropBumTimmer!==null)
+            clearInterval(dropBumTimmer);
     }
 
     function clearShootBoltTimmer(){
-        clearInterval(shootBoltTimmer);
+        if(shootBoltTimmer!==null)
+            clearInterval(shootBoltTimmer);
+    }
+
+    function clearMovingBumTimmer(){
+        if(bumMovingTimmer!==null)
+            clearInterval(bumMovingTimmer);
     }
 }
 
