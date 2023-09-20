@@ -467,7 +467,7 @@ function init() {
             case MOVENETS_KEYS.LEFT_KEY_CODE:
                 player.moveElement(pressedKey);
                 if(player.bolt !== null && player.bolt !== undefined)
-                    player.bolt.startingPosition = player.currentPosition;
+                    player.bolt.currentPosition = player.currentPosition;
                 break;
             case MOVENETS_KEYS.SPACE_KEY_CODE:
                 console.log('shooooooooooot');
