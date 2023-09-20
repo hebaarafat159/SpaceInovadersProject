@@ -18,12 +18,16 @@ function init() {
     }
 
     const DROP_DUM_TIME_INTERVAL = 1000;
-    const DROP_MOVING_TIME_INTERVAL = 500;
-    const SHOOT_BOLT_TIME_INTERVAL = 100;
+    const DROP_MOVING_TIME_INTERVAL = 2000;
+    const SHOOT_BOLT_TIME_INTERVAL = 50;
     const MOVING_ALIEN_DOWN_TIME_INTERVAL = 1000;
 
+    const SCORE_ALIENT_RANGE = 100;
+    const SCORE_BUM_RANGE = 1000;
+
+    const LIVES_MAX_NUMBERS = 3;
+
     // init timmers
-    // TODO set timmer to move aliens down.
     let aliensTimmer = null;
     let dropBumTimmer = null;
     let shootBoltTimmer = null;
@@ -145,8 +149,8 @@ function init() {
     /*----- STATE VARIABLES -----*/
 
     const aliens = [];
+    const lives = [];
     let player = null;
-    let score = 0;
 
     // gird Config
     const width = 10;
@@ -154,9 +158,10 @@ function init() {
     const cellCount = width * height;
 
     // create grid
-    const grid = document.querySelector('.grid');
+    const gridView = document.querySelector('.grid');
     const buttons = document.querySelectorAll('button');
-
+    const scoreView = document.getElementById('score');
+    const livesView = document.getElementById('lives');
     /*----- EVENT LISTENERS listeners -----*/
 
     document.addEventListener('keyup', handleMovement);
@@ -206,7 +211,7 @@ function init() {
             cell.style.width = `${100/width}%`;
 
             // Add cell to grid
-            grid.appendChild(cell);
+            gridView.appendChild(cell);
         }
     }
    
@@ -277,7 +282,7 @@ function init() {
 
         for(let i = 0; i < aliens.length; i++)
         {
-            if(aliens[i].currentPosition === player.currentPosition || aliens[i].bum.currentPosition === player.currentPosition){
+            if(aliens[i].currentPosition === player.currentPosition || (aliens[i].bum !== null && aliens[i].bum.currentPosition === player.currentPosition)){
                 isHitten = true;
                 // console.log(`the player has been hitten !!!!!`);
                 break;
@@ -290,27 +295,40 @@ function init() {
         {
             console.log(`the player has been hitten !!!!!`);
             // TODO discrease score or dicrease number of hearts
+            
             // TODO display gameover view 
         }
     }
 
     function startShootBoltTimmer() {
         player.shoot();
-        shootAliens();
+        shootAliensAndBums();
     }
 
     /**
-     * hide adn reomver hitted aliens from aliens array, and increase score 
+     * hide and reomver hitted aliens from aliens array,
+     * hide and delete bum,
+     * and increase score 
      */
-    function shootAliens(){
+    function shootAliensAndBums(){
         
         for(let i = 0; i < aliens.length; i++)
         {
-            if(aliens[i].currentPosition === player.bolt.currentPosition){
+            // check if the bolt shoot an alien
+            if(player.bolt.currentPosition === aliens[i].currentPosition){
                 console.log(`Aliens Hited`);
                 aliens[i].hideFromGrid();
                 aliens.splice(i,1);
-                // TODO increate score 
+                updateScore(1, SCORE_ALIENT_RANGE);
+            }
+            
+            // check if the bolt shoot a bum
+            let bumObject = aliens[i].bum;
+            if((bumObject!==null) && (player.bolt.currentPosition === bumObject.currentPosition))
+            {
+                console.log(`Bum Hited`);
+                aliens[i].bum.hideFromGrid();
+                updateScore(1, SCORE_BUM_RANGE);
             }
         }
         console.log(aliens);
@@ -347,7 +365,65 @@ function init() {
     function resetGameVariabes(){
         const aliens = [];
         let player = null;
-        let score = 0;    
+        updateScore(0,0); 
+        updateLiversNumber(0);
+    }
+
+    /**
+         * this function is for updating score view with the new value
+         * @param {*} functioRequest // 1 -> increase score value, -1 dicrease score value, 0 restscore value to 0 
+         * @param {*} value // the number that the score will be increase or dicrease by.
+         */
+    function updateScore(functioRequest, value){
+        let scoreValue = getScoreValue();
+        switch(functioRequest)
+        {
+            case 1:
+                scoreValue += value;
+                scoreView.style.color = 'green';
+                break;
+            case -1:
+                scoreValue -= value;
+                scoreView.style.color = 'red';
+                break;
+            default:
+                scoreValue = 0;
+                scoreView.style.color = 'gray';
+                break;
+        }
+        scoreView.innerText = scoreValue;
+        console.log(`new score is : ${scoreValue}`);
+    }
+
+    /**
+     * retuen the score displayed value
+     */
+    function getScoreValue(){
+        return parseInt(scoreView.innerText);
+    }
+
+    /**
+    * this function is to render player number of hearts during the game and reset the view during the game 
+    * @param {*} functioRequest // 1 -> increase score value, -1 dicrease score value, 0 restscore value to 0 
+    */
+    function updateLiversNumber(functioRequest){
+        switch(functioRequest){
+            case 1:
+                break;
+            // remove live    
+            case -1:
+                break;    
+            // reset lives    
+            default:
+                for(let i=0; i< LIVES_MAX_NUMBERS; i++)
+                {
+                    let live = document.createElement('div');
+                    live.classList.add(ELEMENTS_SRC_KEYS.player);
+                    livesView.appendChild(live);
+                }
+                break; 
+        }
+       
     }
 
     function handleMovement(event){
@@ -356,10 +432,14 @@ function init() {
         
         switch(pressedKey){
             
-            // case MOVENETS_KEYS.UP_KEY_CODE:
-            //     console.log("UP");
-            //     player.bolt.moveElement(MOVENETS_KEYS.UP_KEY_CODE);
-            //     break;
+            case MOVENETS_KEYS.UP_KEY_CODE:
+                console.log("UP");
+                 // TODO remove testing code
+                 startDropBumTimmer();
+                 //TODO end of testing code
+                 
+                // player.bolt.moveElement(MOVENETS_KEYS.UP_KEY_CODE);
+                break;
             case MOVENETS_KEYS.DOWN_KEY_CODE:
                 console.log("DOWN");
                 stopAllTimers();
@@ -374,7 +454,6 @@ function init() {
                 break;
         }
     }
-
 
     // call functions
     startGame();

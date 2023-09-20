@@ -39,7 +39,22 @@
   .score-wrapper > div {
     margin: 10px auto;
   }
-  
+
+  #lives{
+    display: flex;
+    justify-content:center;
+    align-items: center;
+  }
+
+  #lives > div {
+    background-image: url('../assets/spaceship.png');
+    width: 50px;
+    height: 50px;
+    background-repeat: no-repeat;
+    background-size: contain;
+    cursor: pointer;
+    padding: 5px;
+  }
 
   /*  Game grid css  */
   
@@ -48,10 +63,6 @@
     grid-template-columns: repeat(7, 10vmin);
     grid-template-rows: repeat(6, 10vmin);
     gap: 2vmin;
-
-    /* display: flex; */
-    /* justify-content: center; */
-    /* align-items: center; */
   }
   
   .grid {
@@ -109,7 +120,6 @@
     background-size: contain;
     cursor: pointer;
   }
-
 
   /*  Buttons css  */
   button{
