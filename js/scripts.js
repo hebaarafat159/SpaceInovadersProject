@@ -10,9 +10,16 @@ function init() {
         SPACE_KEY_CODE : 32
     };
 
+    const ELEMENTS_SRC_KEYS = {
+        player: 'spaceship',
+        bolt: 'bolt',
+        alien: 'alien',
+        bum: 'bum'
+    }
+
     const DROP_DUM_TIME_INTERVAL = 1000;
     const DROP_MOVING_TIME_INTERVAL = 500;
-    const SHOOT_BOLT_TIME_INTERVAL = 1000;
+    const SHOOT_BOLT_TIME_INTERVAL = 100;
     const MOVING_ALIEN_DOWN_TIME_INTERVAL = 5000;
 
     // init timmers
@@ -87,7 +94,7 @@ function init() {
 
     class Player extends Element{
         constructor(startingPosition){
-            super('spaceship', startingPosition);
+            super(ELEMENTS_SRC_KEYS.player, startingPosition);
             this.bolt = null;//new Bolt(this.currentPosition);
         }
         shoot(){
@@ -99,13 +106,13 @@ function init() {
 
     class Bolt extends Element{
         constructor(startingPosition){
-            super('bolt', startingPosition);
+            super(ELEMENTS_SRC_KEYS.bolt, startingPosition);
         }
     }
 
     class Alien extends Element{
         constructor(startingPosition){
-            super('alien', startingPosition);
+            super(ELEMENTS_SRC_KEYS.alien, startingPosition);
             this.bum = null;
         }
 
@@ -131,9 +138,10 @@ function init() {
 
     class Bum extends Element{
         constructor(startingPosition){
-            super('bum', startingPosition);
+            super(ELEMENTS_SRC_KEYS.bum, startingPosition);
         }
     }
+
     /*----- STATE VARIABLES -----*/
 
     const aliens = [];
@@ -167,7 +175,7 @@ function init() {
         {
             const cell = document.createElement('div');
             // Add index to div element.
-            cell.innerText = i;
+            // cell.innerText = i;
            
             // Add index as attribute
             cell.dataset.index = i;
