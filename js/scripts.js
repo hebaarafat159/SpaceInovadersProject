@@ -33,6 +33,25 @@ function init() {
     let shootBoltTimmer = null;
     let bumMovingTimmer = null;
 
+
+    const aliens = [];
+    let player = null;
+
+    // gird Config
+    const width = 10;
+    const height = 10;
+    const cellCount = width * height;
+
+    // create grid
+    const gridView = document.querySelector('.grid');
+    const buttons = document.querySelectorAll('button');
+    const scoreView = document.getElementById('score');
+    const livesView = document.getElementById('lives');
+    /*----- EVENT LISTENERS listeners -----*/
+
+    document.addEventListener('keyup', handleMovement);
+    buttons.forEach((button) => button.addEventListener('click', startGame));
+    
     class Element {
         constructor(src, startingPosition){
             this.src = src;
@@ -50,6 +69,7 @@ function init() {
          * it should be one of 'MOVENETS_KEYS' constant values.
          */
         moveElement(movingDirection){
+            let hasNext = true;
             this.hideFromGrid(this.currentPosition);
             switch(movingDirection){
                 case MOVENETS_KEYS.UP_KEY_CODE:
@@ -57,12 +77,15 @@ function init() {
                     {
                         this.currentPosition -= width;
                     }
+                    else{
+                        hasNext = false;
+                    } 
                     break;
                 case MOVENETS_KEYS.DOWN_KEY_CODE:
                     if(this.currentPosition < cellCount-width)
                     {
                         this.currentPosition += width;
-                    }   
+                    }  
                     break;
                 case MOVENETS_KEYS.RIGHT_KEY_CODE:
                     if(this.currentPosition % width < (width-1))
@@ -80,7 +103,9 @@ function init() {
                     hideFromGrid(this.currentPosition);
                     break;
             }
+           
             this.showInGrid(this.currentPosition);
+            return hasNext;
         }
 
         showInGrid()
@@ -104,7 +129,13 @@ function init() {
         shoot(){
             if(this.bolt === null)
                 this.bolt = new Bolt(this.currentPosition);
-            this.bolt.moveElement(MOVENETS_KEYS.UP_KEY_CODE);
+            let hasNext = this.bolt.moveElement(MOVENETS_KEYS.UP_KEY_CODE);
+            if(!hasNext)
+            {
+                this.bolt.hideFromGrid();
+                this.bolt.currentPosition = player.currentPosition;
+                clearShootBoltTimmer();
+            }   
         }
     }
 
@@ -146,27 +177,6 @@ function init() {
         }
     }
 
-    /*----- STATE VARIABLES -----*/
-
-    const aliens = [];
-    const lives = [];
-    let player = null;
-
-    // gird Config
-    const width = 10;
-    const height = 10;
-    const cellCount = width * height;
-
-    // create grid
-    const gridView = document.querySelector('.grid');
-    const buttons = document.querySelectorAll('button');
-    const scoreView = document.getElementById('score');
-    const livesView = document.getElementById('lives');
-    /*----- EVENT LISTENERS listeners -----*/
-
-    document.addEventListener('keyup', handleMovement);
-    buttons.forEach((button) => button.addEventListener('click', startGame));
-    
     /*----- FUNCTIONS -----*/
   
     /**
@@ -246,9 +256,9 @@ function init() {
         displayAliens(aliens);
 
         // init timmers
-        // aliensTimmer = setInterval(startAliensTimmer, MOVING_ALIEN_DOWN_TIME_INTERVAL);
+        aliensTimmer = setInterval(startAliensTimmer, MOVING_ALIEN_DOWN_TIME_INTERVAL);
         //TODO set timmer to drop a bum.
-        // dropBumTimmer = setInterval(startDropBumTimmer,DROP_DUM_TIME_INTERVAL);
+        dropBumTimmer = setInterval(startDropBumTimmer,DROP_DUM_TIME_INTERVAL);
     }
 
     function displayAliens(aliensArray)
@@ -262,7 +272,7 @@ function init() {
     function startAliensTimmer() {
         aliens.forEach((alien) => alien.moveDown());
         // check plater is hidden or not 
-        checkPlayerStatus();
+        isPlayerBeenHitten();
     }
 
     function startDropBumTimmer() {
@@ -271,13 +281,13 @@ function init() {
         // console.log(`selected Index : ${selectRandemAlienIndex} , alient object : ${selectedAlien.currentPosition}` );
         selectedAlien.movingBum();
          // check plater is hidden or not 
-         checkPlayerStatus();
+         isPlayerBeenHitten();
     }
 
     /**
-     * this function check if the player has been hiiten by an alien or a bum.
+     * this function check if the player has been hiten by an alien or a bum.
      */
-    function checkPlayerStatus(){
+    function isPlayerBeenHitten(){
         let isHitten = false;
 
         for(let i = 0; i < aliens.length; i++)
@@ -295,7 +305,7 @@ function init() {
         {
             console.log(`the player has been hitten !!!!!`);
             // TODO discrease score or dicrease number of hearts
-            
+            updateLiversNumber(-1);
             // TODO display gameover view 
         }
     }
@@ -303,8 +313,14 @@ function init() {
     function startShootBoltTimmer() {
         player.shoot();
         shootAliensAndBums();
+        // check if player winnes
+        isPlayerWin();
     }
 
+    function isPlayerWin(){
+        if(aliens.length === 0)
+            showFinalMessage(true);
+    }
     /**
      * hide and reomver hitted aliens from aliens array,
      * hide and delete bum,
@@ -316,7 +332,7 @@ function init() {
         {
             // check if the bolt shoot an alien
             if(player.bolt.currentPosition === aliens[i].currentPosition){
-                console.log(`Aliens Hited`);
+                // console.log(`Aliens Hited`);
                 aliens[i].hideFromGrid();
                 aliens.splice(i,1);
                 updateScore(1, SCORE_ALIENT_RANGE);
@@ -331,7 +347,7 @@ function init() {
                 updateScore(1, SCORE_BUM_RANGE);
             }
         }
-        console.log(aliens);
+        // console.log(aliens);
     }
 
     // stop timmers
@@ -412,6 +428,13 @@ function init() {
                 break;
             // remove live    
             case -1:
+               if(livesView.hasChildNodes())
+                {
+                    livesView.removeChild(livesView.lastChild);
+                }else
+                {
+                    showFinalMessage(false);
+                }
                 break;    
             // reset lives    
             default:
@@ -433,11 +456,7 @@ function init() {
         switch(pressedKey){
             
             case MOVENETS_KEYS.UP_KEY_CODE:
-                console.log("UP");
-                 // TODO remove testing code
-                 startDropBumTimmer();
-                 //TODO end of testing code
-                 
+                console.log("UP");  
                 // player.bolt.moveElement(MOVENETS_KEYS.UP_KEY_CODE);
                 break;
             case MOVENETS_KEYS.DOWN_KEY_CODE:
@@ -447,12 +466,32 @@ function init() {
             case MOVENETS_KEYS.RIGHT_KEY_CODE:
             case MOVENETS_KEYS.LEFT_KEY_CODE:
                 player.moveElement(pressedKey);
+                if(player.bolt !== null && player.bolt !== undefined)
+                    player.bolt.startingPosition = player.currentPosition;
                 break;
             case MOVENETS_KEYS.SPACE_KEY_CODE:
                 console.log('shooooooooooot');
                 shootBoltTimmer = setInterval(startShootBoltTimmer, SHOOT_BOLT_TIME_INTERVAL);
                 break;
         }
+    }
+
+    /**
+     * this function display the final message
+     * and display 'Play again' button 
+     * @param {*} isWinner // true if the player wins, false if he lose all his lives
+     */
+    function showFinalMessage(isWinner){
+        let message = '';
+        
+        if(isWinner)
+            message = `Congratulation you win with score of ${getScoreValue}`;
+        else
+            message ='Game Over'
+        
+        stopAllTimers();
+        //TODO show modal
+        alert(message);
     }
 
     // call functions
