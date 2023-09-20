@@ -310,6 +310,7 @@ function init() {
                 console.log(`Aliens Hited`);
                 aliens[i].hideFromGrid();
                 aliens.splice(i,1);
+                // TODO increate score 
             }
         }
         console.log(aliens);
