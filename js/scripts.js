@@ -20,12 +20,12 @@ function init() {
     const DROP_DUM_TIME_INTERVAL = 1000;
     const DROP_MOVING_TIME_INTERVAL = 500;
     const SHOOT_BOLT_TIME_INTERVAL = 100;
-    const MOVING_ALIEN_DOWN_TIME_INTERVAL = 5000;
+    const MOVING_ALIEN_DOWN_TIME_INTERVAL = 1000;
 
     // init timmers
     // TODO set timmer to move aliens down.
-    let aliensTimmer = null;//setInterval(startAliensTimmer, MOVING_ALIEN_DOWN_TIME_INTERVAL);
-    let dropBumTimmer = null;//setInterval(startDropBumTimmer, DROP_DUM_TIME_INTERVAL);
+    let aliensTimmer = null;
+    let dropBumTimmer = null;
     let shootBoltTimmer = null;
     let bumMovingTimmer = null;
 
@@ -124,9 +124,9 @@ function init() {
             if( this.bum === null || this.bum === undefined)
             {
                 this.bum = new Bum(this.currentPosition);
-                console.log(`the bum current location ${this.bum.currentPosition}`);
+                // console.log(`the bum current location ${this.bum.currentPosition}`);
             }
-            console.log(this.bum);
+            // console.log(this.bum);
             this.bum.moveElement(MOVENETS_KEYS.DOWN_KEY_CODE);  
         }
 
@@ -163,7 +163,29 @@ function init() {
     buttons.forEach((button) => button.addEventListener('click', startGame));
     
     /*----- FUNCTIONS -----*/
-   
+  
+    /**
+     * this function is called by start game button and
+     * it generates new game grid and initialize and render all the grid components.
+     */
+   function startGame(){
+        // reset variables
+        resetGameVariabes();
+
+        // create new grid view
+        renderGrid();
+
+        // initialize player object and calculate it's first position.
+        renderPlayer();
+
+        // change this calculation
+        let totalAlientNumber = (height/2);
+        renderAliens(totalAlientNumber);
+
+        // hide play again button and start game button.
+        buttons.forEach((element => element.style.visibility = 'hidden'));
+    }
+
     /**
      * this function calculate each cell width and height, create them 
      * and appends them to the game main grid.
@@ -199,7 +221,6 @@ function init() {
          player.showInGrid();
     }
 
-
     /**
      * this function create and display aliens list in the row, 
      * after it calculate it's starting position. 
@@ -219,14 +240,11 @@ function init() {
 
         displayAliens(aliens);
 
-        // TODO set timmer to move aliens down.
         // init timmers
         // aliensTimmer = setInterval(startAliensTimmer, MOVING_ALIEN_DOWN_TIME_INTERVAL);
-        dropBumTimmer = setInterval(startDropBumTimmer,DROP_DUM_TIME_INTERVAL);
-        startDropBumTimmer();
-        // Todo set timmer to drop a bum.
+        //TODO set timmer to drop a bum.
+        // dropBumTimmer = setInterval(startDropBumTimmer,DROP_DUM_TIME_INTERVAL);
     }
-
 
     function displayAliens(aliensArray)
     {
@@ -235,32 +253,100 @@ function init() {
         });
     }
 
+    // start timmers
+    function startAliensTimmer() {
+        aliens.forEach((alien) => alien.moveDown());
+        // check plater is hidden or not 
+        checkPlayerStatus();
+    }
+
+    function startDropBumTimmer() {
+        let selectRandemAlienIndex = Math.floor(Math.random() * (aliens.length))
+        let selectedAlien = aliens[selectRandemAlienIndex];
+        // console.log(`selected Index : ${selectRandemAlienIndex} , alient object : ${selectedAlien.currentPosition}` );
+        selectedAlien.movingBum();
+         // check plater is hidden or not 
+         checkPlayerStatus();
+    }
+
+    /**
+     * this function check if the player has been hiiten by an alien or a bum.
+     */
+    function checkPlayerStatus(){
+        let isHitten = false;
+
+        for(let i = 0; i < aliens.length; i++)
+        {
+            if(aliens[i].currentPosition === player.currentPosition || aliens[i].bum.currentPosition === player.currentPosition){
+                isHitten = true;
+                // console.log(`the player has been hitten !!!!!`);
+                break;
+            }else{
+                isHitten = false;
+            }
+        }
+
+        if(isHitten)
+        {
+            console.log(`the player has been hitten !!!!!`);
+            // TODO discrease score or dicrease number of hearts
+            // TODO display gameover view 
+        }
+    }
+
+    function startShootBoltTimmer() {
+        player.shoot();
+        shootAliens();
+    }
+
+    /**
+     * hide adn reomver hitted aliens from aliens array, and increase score 
+     */
+    function shootAliens(){
+        
+        for(let i = 0; i < aliens.length; i++)
+        {
+            if(aliens[i].currentPosition === player.bolt.currentPosition){
+                console.log(`Aliens Hited`);
+                aliens[i].hideFromGrid();
+                aliens.splice(i,1);
+            }
+        }
+        console.log(aliens);
+    }
+
+    // stop timmers
+    function stopAllTimers(){
+        clearAliensTimmer();
+        clearDropBumTimmer();
+        clearShootBoltTimmer();
+        clearMovingBumTimmer();
+    }
+
+    function clearAliensTimmer(){
+        if(aliensTimmer!==null)
+            clearInterval(aliensTimmer);
+    }
+
+    function clearDropBumTimmer(){
+        if(dropBumTimmer!==null)
+            clearInterval(dropBumTimmer);
+    }
+
+    function clearShootBoltTimmer(){
+        if(shootBoltTimmer!==null)
+            clearInterval(shootBoltTimmer);
+    }
+
+    function clearMovingBumTimmer(){
+        if(bumMovingTimmer!==null)
+            clearInterval(bumMovingTimmer);
+    }
+
     function resetGameVariabes(){
         const aliens = [];
         let player = null;
         let score = 0;    
-    }
-
-    /**
-     * this function is called by start game button and
-     * it generates new game grid and initialize and render all the grid components.
-     */
-    function startGame(){
-        // reset variables
-        resetGameVariabes();
-
-        // create new grid view
-        renderGrid();
-
-        // initialize player object and calculate it's first position.
-        renderPlayer();
-
-        // change this calculation
-        let totalAlientNumber = (height/2);
-        renderAliens(totalAlientNumber);
-
-        // hide play again button and start game button.
-        buttons.forEach((element => element.style.visibility = 'hidden'));
     }
 
     function handleMovement(event){
@@ -269,10 +355,10 @@ function init() {
         
         switch(pressedKey){
             
-            case MOVENETS_KEYS.UP_KEY_CODE:
-                console.log("UP");
-                player.bolt.moveElement(MOVENETS_KEYS.UP_KEY_CODE);
-                break;
+            // case MOVENETS_KEYS.UP_KEY_CODE:
+            //     console.log("UP");
+            //     player.bolt.moveElement(MOVENETS_KEYS.UP_KEY_CODE);
+            //     break;
             case MOVENETS_KEYS.DOWN_KEY_CODE:
                 console.log("DOWN");
                 stopAllTimers();
@@ -288,51 +374,10 @@ function init() {
         }
     }
 
+
+    // call functions
     startGame();
 
-    // start timmers
-    function startAliensTimmer() {
-            aliens.forEach((alien) => alien.moveDown());
-    }
-
-    function startShootBoltTimmer() {
-        player.shoot();
-    }
-    
-    function startDropBumTimmer() {
-        let selectRandemAlienIndex = Math.floor(Math.random() * (aliens.length))
-        let selectedAlien = aliens[selectRandemAlienIndex];
-        console.log(`selected Index : ${selectRandemAlienIndex} , alient object : ${selectedAlien.currentPosition}` );
-        selectedAlien.movingBum();
-    }
-
-    // stop timmers
-    function stopAllTimers(){
-        clearAliensTimmer();
-        clearDropBumTimmer();
-        clearShootBoltTimmer();
-        clearMovingBumTimmer();
-    }
-
-    function clearAliensTimmer(){
-        if(aliensTimmer!==null)
-            clearInterval(aliensTimmer);
-    }
-    
-    function clearDropBumTimmer(){
-        if(dropBumTimmer!==null)
-            clearInterval(dropBumTimmer);
-    }
-
-    function clearShootBoltTimmer(){
-        if(shootBoltTimmer!==null)
-            clearInterval(shootBoltTimmer);
-    }
-
-    function clearMovingBumTimmer(){
-        if(bumMovingTimmer!==null)
-            clearInterval(bumMovingTimmer);
-    }
 }
 
 window.addEventListener('DOMContentLoaded', init)
