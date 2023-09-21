@@ -85,7 +85,9 @@ function init() {
                     if(this.currentPosition < cellCount-width)
                     {
                         this.currentPosition += width;
-                    }  
+                    } else{
+                        hasNext = false;
+                    }   
                     break;
                 case MOVENETS_KEYS.RIGHT_KEY_CODE:
                     if(this.currentPosition % width < (width-1))
@@ -151,18 +153,23 @@ function init() {
             this.bum = null;
         }
 
+        hasBum(){
+            return (this.bum !== null && this.bum !== undefined);
+        }
+
         moveDown(){
-            this.moveElement(MOVENETS_KEYS.DOWN_KEY_CODE);
+            // move the bum first then the alien
+            if(this.hasBum())
+                this.movingBum();
+            return this.moveElement(MOVENETS_KEYS.DOWN_KEY_CODE);
         }
 
         movingBum(){
             if( this.bum === null || this.bum === undefined)
-            {
                 this.bum = new Bum(this.currentPosition);
-                // console.log(`the bum current location ${this.bum.currentPosition}`);
-            }
-            // console.log(this.bum);
-            this.bum.moveElement(MOVENETS_KEYS.DOWN_KEY_CODE);  
+            // hide bum when it reaches the buttom eadge
+            if(!(this.bum.moveElement(MOVENETS_KEYS.DOWN_KEY_CODE)))
+                this.bum.hideFromGrid();
         }
 
         // dropBum(){
@@ -179,6 +186,14 @@ function init() {
 
     /*----- FUNCTIONS -----*/
   
+    function reloadGame(){
+        startGame();
+    }
+
+    function resetGame(){
+        updateLiversNumber(0);
+        startGame();
+    }
     /**
      * this function is called by start game button and
      * it generates new game grid and initialize and render all the grid components.
@@ -186,7 +201,7 @@ function init() {
    function startGame(){
         // reset variables
         resetGameVariabes();
-
+        
         // create new grid view
         renderGrid();
 
@@ -270,7 +285,15 @@ function init() {
 
     // start timmers
     function startAliensTimmer() {
-        aliens.forEach((alien) => alien.moveDown());
+        aliens.forEach((alien) => {
+            let hasNext = alien.moveDown();
+            if(!hasNext)
+            {
+                alien.hideFromGrid();
+                // show game over message if an alien reaches the buttom borader.
+                showFinalMessage(false);
+            }
+        });
         // check plater is hidden or not 
         isPlayerBeenHitten();
     }
@@ -280,8 +303,8 @@ function init() {
         let selectedAlien = aliens[selectRandemAlienIndex];
         // console.log(`selected Index : ${selectRandemAlienIndex} , alient object : ${selectedAlien.currentPosition}` );
         selectedAlien.movingBum();
-         // check plater is hidden or not 
-         isPlayerBeenHitten();
+        // check plater is hidden or not 
+        isPlayerBeenHitten();
     }
 
     /**
@@ -306,6 +329,7 @@ function init() {
             console.log(`the player has been hitten !!!!!`);
             // TODO discrease score or dicrease number of hearts
             updateLiversNumber(-1);
+            reloadGame();
             // TODO display gameover view 
         }
     }
@@ -381,8 +405,8 @@ function init() {
     function resetGameVariabes(){
         const aliens = [];
         let player = null;
-        updateScore(0,0); 
-        updateLiversNumber(0);
+        updateScore(0,0);
+        updateLiversNumber(0); 
     }
 
     /**
@@ -461,6 +485,7 @@ function init() {
                 break;
             case MOVENETS_KEYS.DOWN_KEY_CODE:
                 console.log("DOWN");
+                //TODO remove this line
                 stopAllTimers();
                 break;
             case MOVENETS_KEYS.RIGHT_KEY_CODE:
@@ -491,8 +516,20 @@ function init() {
         
         stopAllTimers();
         //TODO show modal
-        alert(message);
+        // alert(message);
+        renderResultModal(message);
     }
+
+    function renderResultModal(message){
+  
+        const myMessage = document.getElementById('messagTextId');
+        myMessage.innerText = message;
+     
+        
+        const modelView = new bootstrap.Modal(document.getElementById('messageModelId'));
+        modelView.show();  
+    }
+     
 
     // call functions
     startGame();
