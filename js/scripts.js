@@ -43,11 +43,11 @@ function init() {
     const cellCount = width * height;
 
     // create grid
-    const gridView = document.querySelector('.grid');
+    let gridView = document.querySelector('.grid');
     const buttons = document.querySelectorAll('button');
     const scoreView = document.getElementById('score');
     const livesView = document.getElementById('lives');
-    const modelView = new bootstrap.Modal(document.getElementById('messageModelId'));
+    const modelView = document.getElementById('messageModelId');//new bootstrap.Modal(document.getElementById('messageModelId'));
     /*----- EVENT LISTENERS listeners -----*/
 
     document.addEventListener('keyup', handleMovement);
@@ -224,6 +224,7 @@ function init() {
      */
     function renderGrid()
     {
+        
         // Use the cellCpint to create our grid cells
         for(let i = 0; i < cellCount; i++)
         {
@@ -240,9 +241,10 @@ function init() {
             // Add cell to grid
             gridView.appendChild(cell);
         }
+        // clearGrid();
     }
 
-    function clearGrid(){
+    function clearGrid(){ 
         while(gridView.hasChildNodes){
             gridView.removeChild(gridView.lastChild);
         }
@@ -542,13 +544,16 @@ function init() {
 
     function renderResultModal(requestAction,buttonTitle,message){
   
+        let dialogView = new bootstrap.Modal(modelView);
         const myMessage = document.getElementById('messagTextId');
         myMessage.innerText = message;
      
         let playButtonView = document.getElementById('playBtnId');
         playButtonView.innerText = buttonTitle;
         playButtonView.addEventListener('click',(re)=>{
+            dialogView.hide();
             console.log(`clicked : ${requestAction}` );
+            //modelView.remove(); 
             switch(requestAction)
             {
                 case 1:
@@ -559,16 +564,14 @@ function init() {
                     console.log('STart this game'); 
                     startGame();
                     break;
-            }   
+            } 
         });
-    
-        modelView.show();  
+
+        dialogView.show();
     }
 
     // call functions
     showMessage(0);
-   
-    // startGame();
 
 }
 
