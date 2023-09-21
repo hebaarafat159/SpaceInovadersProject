@@ -47,10 +47,10 @@ function init() {
     const buttons = document.querySelectorAll('button');
     const scoreView = document.getElementById('score');
     const livesView = document.getElementById('lives');
+    const modelView = new bootstrap.Modal(document.getElementById('messageModelId'));
     /*----- EVENT LISTENERS listeners -----*/
 
     document.addEventListener('keyup', handleMovement);
-    buttons.forEach((button) => button.addEventListener('click', startGame));
     
     class Element {
         constructor(src, startingPosition){
@@ -187,19 +187,24 @@ function init() {
     /*----- FUNCTIONS -----*/
   
     function reloadGame(){
-        startGame();
+        // startGame();
     }
 
     function resetGame(){
+        gridView.remove();
         updateLiversNumber(0);
-        startGame();
+        // startGame();
     }
     /**
      * this function is called by start game button and
      * it generates new game grid and initialize and render all the grid components.
      */
    function startGame(){
+        // TODO hide modal
+        // modelView.style.visibility = 'hidden';
+        
         // reset variables
+        stopAllTimers();
         resetGameVariabes();
         
         // create new grid view
@@ -212,8 +217,6 @@ function init() {
         let totalAlientNumber = (height/2);
         renderAliens(totalAlientNumber);
 
-        // hide play again button and start game button.
-        buttons.forEach((element => element.style.visibility = 'hidden'));
     }
 
     /**
@@ -291,7 +294,7 @@ function init() {
             {
                 alien.hideFromGrid();
                 // show game over message if an alien reaches the buttom borader.
-                showFinalMessage(false);
+                showMessage(-1);
             }
         });
         // check plater is hidden or not 
@@ -343,7 +346,7 @@ function init() {
 
     function isPlayerWin(){
         if(aliens.length === 0)
-            showFinalMessage(true);
+        showMessage(1);
     }
     /**
      * hide and reomver hitted aliens from aliens array,
@@ -457,7 +460,7 @@ function init() {
                     livesView.removeChild(livesView.lastChild);
                 }else
                 {
-                    showFinalMessage(false);
+                    showMessage(-1);
                 }
                 break;    
             // reset lives    
@@ -502,37 +505,65 @@ function init() {
     }
 
     /**
-     * this function display the final message
-     * and display 'Play again' button 
-     * @param {*} isWinner // true if the player wins, false if he lose all his lives
+     * this function display the a message to start or to replay the game.
+     * @param {*} requtedAction // 1 -> player winnes, -1 player loses, 0 start the game 
      */
-    function showFinalMessage(isWinner){
-        let message = '';
-        
-        if(isWinner)
-            message = `Congratulation you win with score of ${getScoreValue}`;
-        else
-            message ='Game Over'
-        
+    function showMessage(requtedAction){
+        // stop all strated timmers
         stopAllTimers();
+
+        let message = '';
+        let buttonTitle = 'Start Game'
+        switch(requtedAction)
+        {
+            case 1:
+                buttonTitle = 'Play Again';
+                message = `Congratulation you win with score of ${getScoreValue()}`;
+                break;
+            case -1:
+                buttonTitle = 'Play Again';
+                message ='Game Over';
+                break;
+            default:
+                buttonTitle = 'Start Game';
+                message = "Let's start the game";
+                break;
+        }
+        
         //TODO show modal
         // alert(message);
-        renderResultModal(message);
+        renderResultModal(requtedAction,buttonTitle,message);
     }
 
-    function renderResultModal(message){
+    function renderResultModal(requestAction,buttonTitle,message){
   
         const myMessage = document.getElementById('messagTextId');
         myMessage.innerText = message;
      
-        
-        const modelView = new bootstrap.Modal(document.getElementById('messageModelId'));
+        let playButtonView = document.getElementById('playBtnId');
+        playButtonView.innerText = buttonTitle;
+        playButtonView.addEventListener('click',(re)=>{
+            console.log(`clicked : ${requestAction}` );
+            switch(requestAction)
+            {
+                case 1:
+                case -1:
+                    resetGame();
+                    break;
+                default:
+                    console.log('STart this game'); 
+                    startGame();
+                    break;
+            }   
+        });
+    
         modelView.show();  
     }
-     
 
     // call functions
-    startGame();
+    showMessage(0);
+   
+    // startGame();
 
 }
 
