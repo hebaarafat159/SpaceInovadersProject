@@ -34,7 +34,7 @@ function init() {
     let bumMovingTimmer = null;
 
 
-    const aliens = [];
+    let aliens = [];
     let player = null;
     let start = false;
 
@@ -268,13 +268,14 @@ function init() {
     function clearLives(){ 
         livesView.innerHTML = "";
     }
+
     /**
      * this function calculates player starting posotion 
      * and creates player object with the initial values
      */
     function renderPlayer(){
          // calculate player starting position
-         const playerStartPosition = (cellCount - width) + (height/2) ;
+         const playerStartPosition = (cellCount - (width*2)) + (height/2) ;
          player = new Player(playerStartPosition);
          player.showInGrid();
     }
@@ -429,9 +430,9 @@ function init() {
 
     function resetAllGridElement(){
          //empty aliens list
-         const aliens = [];
+         aliens = [];
          // create new player
-         let player = null;
+         player = null;
          // clear grid
          clearGrid();
     }
