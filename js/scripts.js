@@ -48,7 +48,7 @@ function init() {
     const scoreView = document.getElementById('score');
     const livesView = document.getElementById('lives');
     const modelView = document.getElementById('messageModelId');
-    const myAudio = new Audio("./audio/gameover.wav");
+    const myAudio = new Audio("../audio/gameover.wav");
 
     /*----- EVENT LISTENERS listeners -----*/
 
