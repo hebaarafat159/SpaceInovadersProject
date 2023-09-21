@@ -191,7 +191,6 @@ function init() {
     }
 
     function resetGame(){
-        gridView.remove();
         updateLiversNumber(0);
         // startGame();
     }
@@ -240,6 +239,12 @@ function init() {
 
             // Add cell to grid
             gridView.appendChild(cell);
+        }
+    }
+
+    function clearGrid(){
+        while(gridView.hasChildNodes){
+            gridView.removeChild(gridView.lastChild);
         }
     }
    
