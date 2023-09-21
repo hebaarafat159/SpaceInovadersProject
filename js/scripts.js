@@ -48,7 +48,8 @@ function init() {
     const scoreView = document.getElementById('score');
     const livesView = document.getElementById('lives');
     const modelView = document.getElementById('messageModelId');
-    
+    const myAudio = new Audio("./audio/gameover.wav");
+
     /*----- EVENT LISTENERS listeners -----*/
 
     document.addEventListener('keyup', handleMovement);
@@ -190,20 +191,17 @@ function init() {
     /*----- FUNCTIONS -----*/
   
     function startGame(){
-        // start the game for the first time
-        if(start){
-            console.log('Sttaaaaaaaaaaaart');
-            play();
-        }// replay the game again
-        else{
+        // restore values in case of play again
+        if(!start){
             console.log('Plaaaaaaaay Agaaaaaaaaain');
             // clear lives grid
             clearLives();
             // reset score
             updateScore(0,0);
-            
-            play();
         }
+        
+        play();
+        
     }
 
     function loadGrid(){
@@ -474,6 +472,7 @@ function init() {
     * @param {*} functioRequest // 1 -> increase score value, -1 dicrease score value, 0 restscore value to 0 
     */
     function loseLive(){
+        myAudio.play();
         if(livesView.hasChildNodes())
         { 
            livesView.removeChild(livesView.lastChild);
