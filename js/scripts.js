@@ -36,6 +36,7 @@ function init() {
 
     const aliens = [];
     let player = null;
+    let start = false;
 
     // gird Config
     const width = 10;
@@ -44,10 +45,10 @@ function init() {
 
     // create grid
     let gridView = document.querySelector('.grid');
-    const buttons = document.querySelectorAll('button');
     const scoreView = document.getElementById('score');
     const livesView = document.getElementById('lives');
-    const modelView = document.getElementById('messageModelId');//new bootstrap.Modal(document.getElementById('messageModelId'));
+    const modelView = document.getElementById('messageModelId');
+    
     /*----- EVENT LISTENERS listeners -----*/
 
     document.addEventListener('keyup', handleMovement);
@@ -126,12 +127,14 @@ function init() {
     class Player extends Element{
         constructor(startingPosition){
             super(ELEMENTS_SRC_KEYS.player, startingPosition);
-            this.bolt = null;//new Bolt(this.currentPosition);
+            this.bolt = null;
         }
+
         shoot(){
             if(this.bolt === null)
                 this.bolt = new Bolt(this.currentPosition);
             let hasNext = this.bolt.moveElement(MOVENETS_KEYS.UP_KEY_CODE);
+            // remove the bolt view if it goes upper that the top eadge
             if(!hasNext)
             {
                 this.bolt.hideFromGrid();
@@ -167,7 +170,7 @@ function init() {
         movingBum(){
             if( this.bum === null || this.bum === undefined)
                 this.bum = new Bum(this.currentPosition);
-            // hide bum when it reaches the buttom eadge
+            // hide bum when it reaches the bottom eadge
             if(!(this.bum.moveElement(MOVENETS_KEYS.DOWN_KEY_CODE)))
                 this.bum.hideFromGrid();
         }
@@ -186,36 +189,55 @@ function init() {
 
     /*----- FUNCTIONS -----*/
   
-    function reloadGame(){
-        // startGame();
+    function startGame(){
+        // start the game for the first time
+        if(start){
+            console.log('Sttaaaaaaaaaaaart');
+            play();
+        }// replay the game again
+        else{
+            console.log('Plaaaaaaaay Agaaaaaaaaain');
+            // clear lives grid
+            clearLives();
+            // reset score
+            updateScore(0,0);
+            
+            play();
+        }
     }
 
-    function resetGame(){
-        updateLiversNumber(0);
-        // startGame();
+    function loadGrid(){
+        // stop timmers
+        stopAllTimers();
+            
+        // reset all grid variables
+        resetAllGridElement();
+           
+        // call play 
+        renderGame();
     }
+
     /**
      * this function is called by start game button and
      * it generates new game grid and initialize and render all the grid components.
      */
-   function startGame(){
-        // TODO hide modal
-        // modelView.style.visibility = 'hidden';
-        
-        // reset variables
-        stopAllTimers();
-        resetGameVariabes();
-        
-        // create new grid view
-        renderGrid();
+   function play(){ 
+        // render lives view
+        renderLivesview();
+        renderGame();
+    }
 
-        // initialize player object and calculate it's first position.
-        renderPlayer();
+    function renderGame()
+    {
+         // create new grid view
+         renderGrid();
 
-        // change this calculation
-        let totalAlientNumber = (height/2);
-        renderAliens(totalAlientNumber);
-
+         // initialize player object and calculate it's first position.
+         renderPlayer();
+ 
+         // change this calculation
+         let totalAlientNumber = (height/2);
+         renderAliens(totalAlientNumber);
     }
 
     /**
@@ -224,14 +246,10 @@ function init() {
      */
     function renderGrid()
     {
-        
         // Use the cellCpint to create our grid cells
         for(let i = 0; i < cellCount; i++)
         {
             const cell = document.createElement('div');
-            // Add index to div element.
-            // cell.innerText = i;
-           
             // Add index as attribute
             cell.dataset.index = i;
             // cell.setAttribute('data-index', i);
@@ -241,15 +259,15 @@ function init() {
             // Add cell to grid
             gridView.appendChild(cell);
         }
-        // clearGrid();
     }
 
     function clearGrid(){ 
-        while(gridView.hasChildNodes){
-            gridView.removeChild(gridView.lastChild);
-        }
+        gridView.innerHTML = "";
     }
    
+    function clearLives(){ 
+        livesView.innerHTML = "";
+    }
     /**
      * this function calculates player starting posotion 
      * and creates player object with the initial values
@@ -267,30 +285,31 @@ function init() {
      * @param {*} totalAlientNumber // number of aliens shoould be displayed in the window.
      */
     function renderAliens(totalAlientNumber){
-        // calculate number of aliens in each row.
-        let position = 0;
-        let randomPsotion = 0; 
-        // create array list of Alien objects.
-        for(let i=0; i < totalAlientNumber; i++)
+        if(totalAlientNumber > 0)
         {
-            randomPsotion = Math.floor(Math.random() * (width-1))
-            position =  randomPsotion + (((height/2) -1 )* height);
-            aliens.push(new Alien(position));
+            // calculate number of aliens in each row.
+            let position = 0;
+            let randomPsotion = 0; 
+            // create aliens in randem positions and insert aliens to list
+            for(let i=0; i < totalAlientNumber; i++)
+            {
+                randomPsotion = Math.floor(Math.random() * (width-1))
+                position =  randomPsotion + (((height/2) -1 )* height);
+                aliens.push(new Alien(position));
+            }
+
+            // show aliens 
+            //TODO
+            if( (aliens!==null) && (aliens !== undefined) && (aliens.length > 0))
+            {
+                aliens.forEach(alien => {alien.showInGrid();});
+
+                //init timmers move aliens down
+                aliensTimmer = setInterval(startAliensTimmer, MOVING_ALIEN_DOWN_TIME_INTERVAL);
+                //set timmer to drop a bum.
+                dropBumTimmer = setInterval(startDropBumTimmer,DROP_DUM_TIME_INTERVAL);
+           }
         }
-
-        displayAliens(aliens);
-
-        // init timmers
-        aliensTimmer = setInterval(startAliensTimmer, MOVING_ALIEN_DOWN_TIME_INTERVAL);
-        //TODO set timmer to drop a bum.
-        dropBumTimmer = setInterval(startDropBumTimmer,DROP_DUM_TIME_INTERVAL);
-    }
-
-    function displayAliens(aliensArray)
-    {
-        aliensArray.map(alien => {
-            alien.showInGrid();
-        });
     }
 
     // start timmers
@@ -327,7 +346,6 @@ function init() {
         {
             if(aliens[i].currentPosition === player.currentPosition || (aliens[i].bum !== null && aliens[i].bum.currentPosition === player.currentPosition)){
                 isHitten = true;
-                // console.log(`the player has been hitten !!!!!`);
                 break;
             }else{
                 isHitten = false;
@@ -336,11 +354,8 @@ function init() {
 
         if(isHitten)
         {
-            console.log(`the player has been hitten !!!!!`);
-            // TODO discrease score or dicrease number of hearts
-            updateLiversNumber(-1);
-            reloadGame();
-            // TODO display gameover view 
+            stopAllTimers();
+            loseLive();
         }
     }
 
@@ -353,7 +368,7 @@ function init() {
 
     function isPlayerWin(){
         if(aliens.length === 0)
-        showMessage(1);
+            showMessage(1);
     }
     /**
      * hide and reomver hitted aliens from aliens array,
@@ -386,39 +401,40 @@ function init() {
 
     // stop timmers
     function stopAllTimers(){
-        clearAliensTimmer();
-        clearDropBumTimmer();
-        clearShootBoltTimmer();
-        clearMovingBumTimmer();
+        stopAliensTimmer();
+        stopDropBumTimmer();
+        stopShootBoltTimmer();
+        stopMovingBumTimmer();
     }
 
-    function clearAliensTimmer(){
+    function stopAliensTimmer(){
         if(aliensTimmer!==null)
             clearInterval(aliensTimmer);
     }
 
-    function clearDropBumTimmer(){
+    function stopDropBumTimmer(){
         if(dropBumTimmer!==null)
             clearInterval(dropBumTimmer);
     }
 
-    function clearShootBoltTimmer(){
+    function stopShootBoltTimmer(){
         if(shootBoltTimmer!==null)
             clearInterval(shootBoltTimmer);
     }
 
-    function clearMovingBumTimmer(){
+    function stopMovingBumTimmer(){
         if(bumMovingTimmer!==null)
             clearInterval(bumMovingTimmer);
     }
 
-    function resetGameVariabes(){
-        const aliens = [];
-        let player = null;
-        updateScore(0,0);
-        updateLiversNumber(0); 
+    function resetAllGridElement(){
+         //empty aliens list
+         const aliens = [];
+         // create new player
+         let player = null;
+         // clear grid
+         clearGrid();
     }
-
     /**
          * this function is for updating score view with the new value
          * @param {*} functioRequest // 1 -> increase score value, -1 dicrease score value, 0 restscore value to 0 
@@ -456,33 +472,27 @@ function init() {
     * this function is to render player number of hearts during the game and reset the view during the game 
     * @param {*} functioRequest // 1 -> increase score value, -1 dicrease score value, 0 restscore value to 0 
     */
-    function updateLiversNumber(functioRequest){
-        switch(functioRequest){
-            case 1:
-                break;
-            // remove live    
-            case -1:
-               if(livesView.hasChildNodes())
-                {
-                    livesView.removeChild(livesView.lastChild);
-                }else
-                {
-                    showMessage(-1);
-                }
-                break;    
-            // reset lives    
-            default:
-                for(let i=0; i< LIVES_MAX_NUMBERS; i++)
-                {
-                    let live = document.createElement('div');
-                    live.classList.add(ELEMENTS_SRC_KEYS.player);
-                    livesView.appendChild(live);
-                }
-                break; 
+    function loseLive(){
+        if(livesView.hasChildNodes())
+        { 
+           livesView.removeChild(livesView.lastChild);
+           // reload Grid
+           loadGrid();
+        }else
+        {
+            // show game over message
+            showMessage(-1);
         }
-       
     }
 
+    function renderLivesview(){
+        for(let i=0; i< LIVES_MAX_NUMBERS; i++)
+        {
+            let live = document.createElement('div');
+            live.classList.add(ELEMENTS_SRC_KEYS.player);
+            livesView.appendChild(live);
+        }
+    }
     function handleMovement(event){
        
         const pressedKey = event.keyCode;
@@ -516,9 +526,6 @@ function init() {
      * @param {*} requtedAction // 1 -> player winnes, -1 player loses, 0 start the game 
      */
     function showMessage(requtedAction){
-        // stop all strated timmers
-        stopAllTimers();
-
         let message = '';
         let buttonTitle = 'Start Game'
         switch(requtedAction)
@@ -537,8 +544,6 @@ function init() {
                 break;
         }
         
-        //TODO show modal
-        // alert(message);
         renderResultModal(requtedAction,buttonTitle,message);
     }
 
@@ -550,21 +555,18 @@ function init() {
      
         let playButtonView = document.getElementById('playBtnId');
         playButtonView.innerText = buttonTitle;
-        playButtonView.addEventListener('click',(re)=>{
+        playButtonView.addEventListener('click',()=>{
             dialogView.hide();
-            console.log(`clicked : ${requestAction}` );
-            //modelView.remove(); 
-            switch(requestAction)
+            // console.log(`clicked : ${requestAction}` );
+            if(playButtonView.innerText === 'Start Game')
             {
-                case 1:
-                case -1:
-                    resetGame();
-                    break;
-                default:
-                    console.log('STart this game'); 
-                    startGame();
-                    break;
-            } 
+                start = true;
+                console.log(playButtonView.innerText);
+            }else{
+                start = false;
+            }
+            
+            startGame();
         });
 
         dialogView.show();
