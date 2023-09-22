@@ -14,7 +14,7 @@ function init() {
         player: 'spaceship',
         bolt: 'bolt',
         alien: 'alien',
-        bum: 'bum'
+        bom: 'bom'
     }
 
     const DROP_DUM_TIME_INTERVAL = 2000;
@@ -23,15 +23,15 @@ function init() {
     const MOVING_ALIEN_DOWN_TIME_INTERVAL = 1000;
 
     const SCORE_ALIENT_RANGE = 100;
-    const SCORE_BUM_RANGE = 1000;
+    const SCORE_bom_RANGE = 1000;
 
     const LIVES_MAX_NUMBERS = 3;
 
     // init timmers
     let aliensTimmer = null;
-    let dropBumTimmer = null;
+    let dropbomTimmer = null;
     let shootBoltTimmer = null;
-    let bumMovingTimmer = null;
+    let bomMovingTimmer = null;
 
 
     let aliens = [];
@@ -161,37 +161,37 @@ function init() {
     class Alien extends Element{
         constructor(startingPosition){
             super(ELEMENTS_SRC_KEYS.alien, startingPosition);
-            this.bum = null;
+            this.bom = null;
         }
 
         /**
-         * return true if the alien has a bum, else return false 
+         * return true if the alien has a bom, else return false 
          * */  
-        hasBum(){
-            return (this.bum !== null && this.bum !== undefined);
+        hasbom(){
+            return (this.bom !== null && this.bom !== undefined);
         }
 
-        deleteBum(){
-             // delete bum if exists
-             if(this.hasBum())
+        deletebom(){
+             // delete bom if exists
+             if(this.hasbom())
              {
-                 this.bum.hideFromGrid();
-                 this.bum = null;
+                 this.bom.hideFromGrid();
+                 this.bom = null;
              }
         }
         
         moveDown(){
-            // move the bum first then the alien
-            if(this.hasBum())
-                this.bum.moveElement(MOVENETS_KEYS.DOWN_KEY_CODE);
+            // move the bom first then the alien
+            if(this.hasbom())
+                this.bom.moveElement(MOVENETS_KEYS.DOWN_KEY_CODE);
             return this.moveElement(MOVENETS_KEYS.DOWN_KEY_CODE);
         }
 
     }
 
-    class Bum extends Element{
+    class bom extends Element{
         constructor(startingPosition){
-            super(ELEMENTS_SRC_KEYS.bum, startingPosition);
+            super(ELEMENTS_SRC_KEYS.bom, startingPosition);
         }
     }
 
@@ -325,8 +325,8 @@ function init() {
         {
             //init timmers move aliens down
             aliensTimmer = setInterval(startAliensTimmer, MOVING_ALIEN_DOWN_TIME_INTERVAL);
-            //set timmer to drop a bum.
-            dropBumTimmer = setInterval(startDropBumTimmer,DROP_DUM_TIME_INTERVAL);
+            //set timmer to drop a bom.
+            dropbomTimmer = setInterval(startDropbomTimmer,DROP_DUM_TIME_INTERVAL);
         }
     }
 
@@ -342,7 +342,7 @@ function init() {
                 let hasNext = alienObject.moveDown();
                 if(hasNext)
                 {
-                    if((alienObject.hasBum() && alienObject.bum.currentPosition === player.currentPosition) 
+                    if((alienObject.hasbom() && alienObject.bom.currentPosition === player.currentPosition) 
                     || alienObject.currentPosition === player.currentPosition){
                         // lose live
                         stopAllTimers();
@@ -361,30 +361,30 @@ function init() {
         }
     }
 
-    function startDropBumTimmer() {
+    function startDropbomTimmer() {
         let selectRandemAlienIndex = Math.floor(Math.random() * (aliens.length))
         let selectedAlien = aliens[selectRandemAlienIndex];
        
-        bumMovingTimmer = setInterval(startMovingBum(selectedAlien),DROP_MOVING_TIME_INTERVAL);   
+        bomMovingTimmer = setInterval(startMovingbom(selectedAlien),DROP_MOVING_TIME_INTERVAL);   
     }
 
-    function startMovingBum(selectedAlien){
+    function startMovingbom(selectedAlien){
         if(selectedAlien != null )
         {
-            if(selectedAlien.bum === null || selectedAlien.bum === undefined)
-                selectedAlien.bum = new Bum(selectedAlien.currentPosition);
-            // hide bum when it reaches the bottom eadge
+            if(selectedAlien.bom === null || selectedAlien.bom === undefined)
+                selectedAlien.bom = new bom(selectedAlien.currentPosition);
+            // hide bom when it reaches the bottom eadge
             
-            if(selectedAlien.hasBum() && selectedAlien.bum.currentPosition === player.currentPosition){
+            if(selectedAlien.hasbom() && selectedAlien.bom.currentPosition === player.currentPosition){
                 // lose live
                 stopAllTimers();
                 loseLive();
             }
 
-            if(!(selectedAlien.bum.moveElement(MOVENETS_KEYS.DOWN_KEY_CODE)))
+            if(!(selectedAlien.bom.moveElement(MOVENETS_KEYS.DOWN_KEY_CODE)))
             { 
-                stopMovingBumTimmer();
-                selectedAlien.deleteBum();
+                stopMovingbomTimmer();
+                selectedAlien.deletebom();
             }
         } 
     }
@@ -405,23 +405,23 @@ function init() {
             {
                 alienObject = aliens[i];
                 console.log(`alien object ${alienObject.currentPosition}` );
-                if((alienObject.hasBum() && alienObject.bum.currentPosition === player.bolt.currentPosition) 
+                if((alienObject.hasbom() && alienObject.bom.currentPosition === player.bolt.currentPosition) 
                     || alienObject.currentPosition === player.bolt.currentPosition){
                 
                     // stop shooting timer
                     stopShootBoltTimmer();
                     
-                    // update score with bum score
-                    if(alienObject.hasBum())
-                         updateScore(1, SCORE_BUM_RANGE);
+                    // update score with bom score
+                    if(alienObject.hasbom())
+                         updateScore(1, SCORE_bom_RANGE);
 
                     // update score with alien score
                     updateScore(1, SCORE_ALIENT_RANGE);
 
-                    /* remove and hide alien and bum  */
+                    /* remove and hide alien and bom  */
                     
-                    // delete and remove bum if exsits
-                    alienObject.deleteBum();
+                    // delete and remove bom if exsits
+                    alienObject.deletebom();
                     // hide alien
                     alienObject.hideFromGrid();
 
@@ -452,9 +452,9 @@ function init() {
     // stop timmers
     function stopAllTimers(){
         stopAliensTimmer();
-        stopDropBumTimmer();
+        stopDropbomTimmer();
         stopShootBoltTimmer();
-        stopMovingBumTimmer();
+        stopMovingbomTimmer();
     }
 
     function stopAliensTimmer(){
@@ -465,11 +465,11 @@ function init() {
         }
     }
 
-    function stopDropBumTimmer(){
-        if(dropBumTimmer!==null)
+    function stopDropbomTimmer(){
+        if(dropbomTimmer!==null)
         {
-            clearInterval(dropBumTimmer);
-            dropBumTimmer = null;
+            clearInterval(dropbomTimmer);
+            dropbomTimmer = null;
         }
     }
 
@@ -481,11 +481,11 @@ function init() {
         }
     }
 
-    function stopMovingBumTimmer(){
-        if(bumMovingTimmer!==null)
+    function stopMovingbomTimmer(){
+        if(bomMovingTimmer!==null)
         {
-            clearInterval(bumMovingTimmer);
-            bumMovingTimmer = null;
+            clearInterval(bomMovingTimmer);
+            bomMovingTimmer = null;
         }
     }
 

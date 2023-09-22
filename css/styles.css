@@ -86,7 +86,7 @@
   }
   
 
-  /*  elements css : spaceship, alien, bum, bolt */
+  /*  elements css : spaceship, alien, bom, bolt */
 
   .grid div.spaceship {
     background-image: url('../assets/spaceship.png');
@@ -106,8 +106,8 @@
     cursor: pointer;
   }
 
-  .grid div.bum {
-    background-image: url('../assets/bum.png');
+  .grid div.bom {
+    background-image: url('../assets/bom.png');
     /* border: 2px dotted transparent ; */
     /* border-radius: 50%; */
     /* background-color: black; */
