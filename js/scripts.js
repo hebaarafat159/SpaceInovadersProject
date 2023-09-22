@@ -48,7 +48,7 @@ function init() {
     const scoreView = document.getElementById('score');
     const livesView = document.getElementById('lives');
     const modelView = document.getElementById('messageModelId');
-    const myAudio = new Audio("../audio/gameover.wav");
+    const myAudio = new Audio("./audio/gameover.wav");
 
     /*----- EVENT LISTENERS listeners -----*/
 
@@ -131,17 +131,23 @@ function init() {
             this.bolt = null;
         }
 
+        hasBolt(){
+            return (this.bolt !== null && this.bolt !== undefined);
+        }
+
+        deleteBolt(){
+            if(this.hasBolt())
+             {
+                 this.bolt.hideFromGrid();
+                 this.bolt = null;
+             }
+        }
+
         shoot(){
             if(this.bolt === null)
                 this.bolt = new Bolt(this.currentPosition);
-            let hasNext = this.bolt.moveElement(MOVENETS_KEYS.UP_KEY_CODE);
-            // remove the bolt view if it goes upper that the top eadge
-            if(!hasNext)
-            {
-                this.bolt.hideFromGrid();
-                this.bolt.currentPosition = player.currentPosition;
-                clearShootBoltTimmer();
-            }   
+            return(this.bolt.moveElement(MOVENETS_KEYS.UP_KEY_CODE));
+            //TODO  
         }
     }
 
@@ -161,6 +167,14 @@ function init() {
             return (this.bum !== null && this.bum !== undefined);
         }
 
+        deleteBum(){
+             // delete bum if exists
+             if(this.hasBum())
+             {
+                 this.bum.hideFromGrid();
+                 this.bum = null;
+             }
+        }
         moveDown(){
             // move the bum first then the alien
             if(this.hasBum())
@@ -173,7 +187,9 @@ function init() {
                 this.bum = new Bum(this.currentPosition);
             // hide bum when it reaches the bottom eadge
             if(!(this.bum.moveElement(MOVENETS_KEYS.DOWN_KEY_CODE)))
-                this.bum.hideFromGrid();
+                this.deleteBum();
+                //this.bum.hideFromGrid();
+            // TODO try bum = null
         }
 
         // dropBum(){
@@ -194,6 +210,7 @@ function init() {
         // restore values in case of play again
         if(!start){
             console.log('Plaaaaaaaay Agaaaaaaaaain');
+            resetAllGridElement();
             // clear lives grid
             clearLives();
             // reset score
@@ -289,12 +306,17 @@ function init() {
             // calculate number of aliens in each row.
             let position = 0;
             let randomPsotion = 0; 
+            let indexes = [];
             // create aliens in randem positions and insert aliens to list
             for(let i=0; i < totalAlientNumber; i++)
             {
                 randomPsotion = Math.floor(Math.random() * (width-1))
-                position =  randomPsotion + (((height/2) -1 )* height);
-                aliens.push(new Alien(position));
+                if(indexes.indexOf(randomPsotion) === -1)
+                {
+                    indexes.push(randomPsotion);
+                    position =  randomPsotion + (((height/2) -1 )* height);
+                    aliens.push(new Alien(position));
+                }
             }
 
             // show aliens 
@@ -303,14 +325,20 @@ function init() {
             {
                 aliens.forEach(alien => {alien.showInGrid();});
 
-                //init timmers move aliens down
-                aliensTimmer = setInterval(startAliensTimmer, MOVING_ALIEN_DOWN_TIME_INTERVAL);
-                //set timmer to drop a bum.
-                dropBumTimmer = setInterval(startDropBumTimmer,DROP_DUM_TIME_INTERVAL);
+                // startTimers();
            }
         }
     }
 
+    function startTimers(){
+        if( (aliens!==null) && (aliens !== undefined) && (aliens.length > 0))
+        {
+            //init timmers move aliens down
+            aliensTimmer = setInterval(startAliensTimmer, MOVING_ALIEN_DOWN_TIME_INTERVAL);
+            //set timmer to drop a bum.
+            dropBumTimmer = setInterval(startDropBumTimmer,DROP_DUM_TIME_INTERVAL);
+        }
+    }
     // start timmers
     function startAliensTimmer() {
         aliens.forEach((alien) => {
@@ -343,7 +371,7 @@ function init() {
 
         for(let i = 0; i < aliens.length; i++)
         {
-            if(aliens[i].currentPosition === player.currentPosition || (aliens[i].bum !== null && aliens[i].bum.currentPosition === player.currentPosition)){
+            if(aliens[i].currentPosition === player.currentPosition || (aliens[i].hasBum() && aliens[i].bum.currentPosition === player.currentPosition)){
                 isHitten = true;
                 break;
             }else{
@@ -358,17 +386,67 @@ function init() {
         }
     }
 
+    // TODO refactor this function
     function startShootBoltTimmer() {
-        player.shoot();
-        shootAliensAndBums();
-        // check if player winnes
-        isPlayerWin();
+        let hasNext = player.shoot();
+       
+        // check winning
+        checkWinning(hasNext);
     }
 
+    function checkWinning(hasNext){
+        // check if the bolt hit any of the alins
+        if((aliens.length > 0) && (hasNext))
+        {
+            let alienObject = null;
+            for(let i=0; i<aliens.length ;i++)
+            {
+                alienObject = aliens[i];
+                console.log(`alien object ${alienObject.currentPosition}` );
+                if((alienObject.hasBum() && alienObject.bum.currentPosition === player.bolt.currentPosition) 
+                    || alienObject.currentPosition === player.bolt.currentPosition){
+                
+                    // stop shooting timer
+                    stopShootBoltTimmer();
+                    
+                    // update score with bum score
+                    if(alienObject.hasBum())
+                         updateScore(1, SCORE_BUM_RANGE);
+
+                    // update score with alien score
+                    updateScore(1, SCORE_ALIENT_RANGE);
+
+                    /* remove and hide alien and bum  */
+                    
+                    // delete and remove bum if exsits
+                    alienObject.deleteBum();
+                    // hide alien
+                    alienObject.hideFromGrid();
+
+                    // delete alin from alins list
+                    aliens.splice(i,1);
+                                  
+                    // remove and hide bolt
+                    player.deleteBolt();   
+                        
+                    break;
+                }
+            }
+
+            isPlayerWin();
+        }else{
+            // stop shooting timer
+            stopShootBoltTimmer();
+            player.deleteBolt();
+            isPlayerWin();
+        }
+    }
+ 
     function isPlayerWin(){
         if(aliens.length === 0)
             showMessage(1);
     }
+
     /**
      * hide and reomver hitted aliens from aliens array,
      * hide and delete bum,
@@ -378,21 +456,22 @@ function init() {
         
         for(let i = 0; i < aliens.length; i++)
         {
+             // check if the bolt shoot a bum
+            if(aliens[i].hasBum() && (player.bolt.currentPosition === aliens[i].bum.currentPosition))
+            {
+                console.log(`Bum Hited`);
+                // aliens[i].bum.hideFromGrid();
+                aliens[i].deleteBum();
+                updateScore(1, SCORE_BUM_RANGE);
+                stopDropBumTimmer();
+            }
+
             // check if the bolt shoot an alien
             if(player.bolt.currentPosition === aliens[i].currentPosition){
-                // console.log(`Aliens Hited`);
+                aliens[i].deleteBum();
                 aliens[i].hideFromGrid();
                 aliens.splice(i,1);
                 updateScore(1, SCORE_ALIENT_RANGE);
-            }
-            
-            // check if the bolt shoot a bum
-            let bumObject = aliens[i].bum;
-            if((bumObject!==null) && (player.bolt.currentPosition === bumObject.currentPosition))
-            {
-                console.log(`Bum Hited`);
-                aliens[i].bum.hideFromGrid();
-                updateScore(1, SCORE_BUM_RANGE);
             }
         }
         // console.log(aliens);
@@ -434,6 +513,7 @@ function init() {
          // clear grid
          clearGrid();
     }
+
     /**
          * this function is for updating score view with the new value
          * @param {*} functioRequest // 1 -> increase score value, -1 dicrease score value, 0 restscore value to 0 
