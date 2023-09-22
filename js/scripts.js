@@ -48,7 +48,9 @@ function init() {
     const scoreView = document.getElementById('score');
     const livesView = document.getElementById('lives');
     const modelView = document.getElementById('messageModelId');
-    const myAudio = new Audio("./audio/gameover.wav");
+    const loseAudio = new Audio("./audio/gameover.wav");
+    const winAudio = new Audio("./audio/win.mp3");
+
 
     /*----- EVENT LISTENERS listeners -----*/
 
@@ -520,7 +522,7 @@ function init() {
     * @param {*} functioRequest // 1 -> increase score value, -1 dicrease score value, 0 restscore value to 0 
     */
     function loseLive(){
-        myAudio.play();
+        loseAudio.play();
         if(livesView.hasChildNodes())
         { 
            livesView.removeChild(livesView.lastChild);
@@ -578,10 +580,12 @@ function init() {
         switch(requtedAction)
         {
             case 1:
+                winAudio.play();
                 buttonTitle = 'Play Again';
                 message = `Congratulation you win with score of ${getScoreValue()}`;
                 break;
             case -1:
+                loseAudio.play();
                 buttonTitle = 'Play Again';
                 message ='Game Over';
                 break;
