@@ -201,10 +201,6 @@ function init() {
         // restore values in case of play again
         if(!start){
             stopAllTimers();
-            aliensTimmer = null;
-            dropBumTimmer = null;
-            shootBoltTimmer = null;
-            bumMovingTimmer = null;
             
             console.log('Plaaaaaaaay Agaaaaaaaaain');
             resetAllGridElement();
@@ -463,22 +459,34 @@ function init() {
 
     function stopAliensTimmer(){
         if(aliensTimmer!==null)
+        {
             clearInterval(aliensTimmer);
+            aliensTimmer = null;
+        }
     }
 
     function stopDropBumTimmer(){
         if(dropBumTimmer!==null)
+        {
             clearInterval(dropBumTimmer);
+            dropBumTimmer = null;
+        }
     }
 
     function stopShootBoltTimmer(){
         if(shootBoltTimmer!==null)
+        {
             clearInterval(shootBoltTimmer);
+            shootBoltTimmer = null;
+        }
     }
 
     function stopMovingBumTimmer(){
         if(bumMovingTimmer!==null)
+        {
             clearInterval(bumMovingTimmer);
+            bumMovingTimmer = null;
+        }
     }
 
     function resetAllGridElement(){
