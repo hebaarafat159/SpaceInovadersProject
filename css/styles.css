@@ -48,12 +48,12 @@
 
   #lives > div {
     background-image: url('../assets/spaceship.png');
-    width: 50px;
-    height: 50px;
+    width: 40px;
+    height: 40px;
     background-repeat: no-repeat;
     background-size: contain;
     cursor: pointer;
-    padding: 5px;
+    margin: 10px;
   }
 
   /*  Game grid css  */
@@ -63,17 +63,19 @@
     grid-template-columns: repeat(7, 10vmin);
     grid-template-rows: repeat(6, 10vmin);
     gap: 2vmin;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
   }
   
   .grid {
-    align-items: center;
-    /* box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2); */
     display: flex;
     flex-wrap: wrap;
-    /* height: 100%; */
     justify-content: center;
-    height: 600px;
-    width: 600px;
+    align-items: center;
+    height: 400px;
+    width: 400px;
   }
   
   .grid div {
