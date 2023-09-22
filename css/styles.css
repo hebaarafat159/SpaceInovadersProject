@@ -76,10 +76,12 @@
     align-items: center;
     height: 400px;
     width: 400px;
+    border: 2px solid lightgrey;
+    box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2);
   }
   
   .grid div {
-    border: 1px solid lightgrey;
+    border: 1px solid transparent;
     flex-grow: 1;
   }
   
