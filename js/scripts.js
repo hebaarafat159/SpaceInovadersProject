@@ -17,8 +17,8 @@ function init() {
         bum: 'bum'
     }
 
-    const DROP_DUM_TIME_INTERVAL = 1000;
-    const DROP_MOVING_TIME_INTERVAL = 2000;
+    const DROP_DUM_TIME_INTERVAL = 2000;
+    const DROP_MOVING_TIME_INTERVAL = 50;
     const SHOOT_BOLT_TIME_INTERVAL = 50;
     const MOVING_ALIEN_DOWN_TIME_INTERVAL = 1000;
 
@@ -147,7 +147,6 @@ function init() {
             if(this.bolt === null)
                 this.bolt = new Bolt(this.currentPosition);
             return(this.bolt.moveElement(MOVENETS_KEYS.UP_KEY_CODE));
-            //TODO  
         }
     }
 
@@ -163,6 +162,9 @@ function init() {
             this.bum = null;
         }
 
+        /**
+         * return true if the alien has a bum, else return false 
+         * */  
         hasBum(){
             return (this.bum !== null && this.bum !== undefined);
         }
@@ -175,27 +177,14 @@ function init() {
                  this.bum = null;
              }
         }
+        
         moveDown(){
             // move the bum first then the alien
             if(this.hasBum())
-                this.movingBum();
+                this.bum.moveElement(MOVENETS_KEYS.DOWN_KEY_CODE);
             return this.moveElement(MOVENETS_KEYS.DOWN_KEY_CODE);
         }
 
-        movingBum(){
-            if( this.bum === null || this.bum === undefined)
-                this.bum = new Bum(this.currentPosition);
-            // hide bum when it reaches the bottom eadge
-            if(!(this.bum.moveElement(MOVENETS_KEYS.DOWN_KEY_CODE)))
-                this.deleteBum();
-                //this.bum.hideFromGrid();
-            // TODO try bum = null
-        }
-
-        // dropBum(){
-        //     // bumMovingTimmer = setInterval(this.movingBum,DROP_MOVING_TIME_INTERVAL);
-        //     // this.movingBum();
-        // }
     }
 
     class Bum extends Element{
@@ -319,13 +308,10 @@ function init() {
                 }
             }
 
-            // show aliens 
-            //TODO
             if( (aliens!==null) && (aliens !== undefined) && (aliens.length > 0))
             {
                 aliens.forEach(alien => {alien.showInGrid();});
-
-                // startTimers();
+                startTimers();
            }
         }
     }
@@ -339,54 +325,66 @@ function init() {
             dropBumTimmer = setInterval(startDropBumTimmer,DROP_DUM_TIME_INTERVAL);
         }
     }
+
     // start timmers
     function startAliensTimmer() {
-        aliens.forEach((alien) => {
-            let hasNext = alien.moveDown();
-            if(!hasNext)
+
+        if(aliens.length > 0)
+        {
+            let alienObject = null;
+            for(let i=0; i<aliens.length ;i++)
             {
-                alien.hideFromGrid();
-                // show game over message if an alien reaches the buttom borader.
-                showMessage(-1);
+                alienObject = aliens[i];
+                let hasNext = alienObject.moveDown();
+                if(hasNext)
+                {
+                    if((alienObject.hasBum() && alienObject.bum.currentPosition === player.currentPosition) 
+                    || alienObject.currentPosition === player.currentPosition){
+                        // lose live
+                        stopAllTimers();
+                        loseLive();
+                        break;
+                    }
+                }else{
+                    // game over
+                    alienObject.hideFromGrid();
+                    // show game over message if an alien reaches the buttom borader.
+                    stopAllTimers();
+                    showMessage(-1);
+                    break;
+                }
             }
-        });
-        // check plater is hidden or not 
-        isPlayerBeenHitten();
+        }
     }
 
     function startDropBumTimmer() {
         let selectRandemAlienIndex = Math.floor(Math.random() * (aliens.length))
         let selectedAlien = aliens[selectRandemAlienIndex];
-        // console.log(`selected Index : ${selectRandemAlienIndex} , alient object : ${selectedAlien.currentPosition}` );
-        selectedAlien.movingBum();
-        // check plater is hidden or not 
-        isPlayerBeenHitten();
+       
+        bumMovingTimmer = setInterval(startMovingBum(selectedAlien),DROP_MOVING_TIME_INTERVAL);   
     }
 
-    /**
-     * this function check if the player has been hiten by an alien or a bum.
-     */
-    function isPlayerBeenHitten(){
-        let isHitten = false;
-
-        for(let i = 0; i < aliens.length; i++)
+    function startMovingBum(selectedAlien){
+        if(selectedAlien != null )
         {
-            if(aliens[i].currentPosition === player.currentPosition || (aliens[i].hasBum() && aliens[i].bum.currentPosition === player.currentPosition)){
-                isHitten = true;
-                break;
-            }else{
-                isHitten = false;
+            if(selectedAlien.bum === null || selectedAlien.bum === undefined)
+                selectedAlien.bum = new Bum(selectedAlien.currentPosition);
+            // hide bum when it reaches the bottom eadge
+            
+            if(selectedAlien.hasBum() && selectedAlien.bum.currentPosition === player.currentPosition){
+                // lose live
+                stopAllTimers();
+                loseLive();
             }
-        }
 
-        if(isHitten)
-        {
-            stopAllTimers();
-            loseLive();
-        }
+            if(!(selectedAlien.bum.moveElement(MOVENETS_KEYS.DOWN_KEY_CODE)))
+            { 
+                stopMovingBumTimmer();
+                selectedAlien.deleteBum();
+            }
+        } 
     }
 
-    // TODO refactor this function
     function startShootBoltTimmer() {
         let hasNext = player.shoot();
        
@@ -445,36 +443,6 @@ function init() {
     function isPlayerWin(){
         if(aliens.length === 0)
             showMessage(1);
-    }
-
-    /**
-     * hide and reomver hitted aliens from aliens array,
-     * hide and delete bum,
-     * and increase score 
-     */
-    function shootAliensAndBums(){
-        
-        for(let i = 0; i < aliens.length; i++)
-        {
-             // check if the bolt shoot a bum
-            if(aliens[i].hasBum() && (player.bolt.currentPosition === aliens[i].bum.currentPosition))
-            {
-                console.log(`Bum Hited`);
-                // aliens[i].bum.hideFromGrid();
-                aliens[i].deleteBum();
-                updateScore(1, SCORE_BUM_RANGE);
-                stopDropBumTimmer();
-            }
-
-            // check if the bolt shoot an alien
-            if(player.bolt.currentPosition === aliens[i].currentPosition){
-                aliens[i].deleteBum();
-                aliens[i].hideFromGrid();
-                aliens.splice(i,1);
-                updateScore(1, SCORE_ALIENT_RANGE);
-            }
-        }
-        // console.log(aliens);
     }
 
     // stop timmers
@@ -585,8 +553,7 @@ function init() {
                 break;
             case MOVENETS_KEYS.DOWN_KEY_CODE:
                 console.log("DOWN");
-                //TODO remove this line
-                stopAllTimers();
+                // stopAllTimers();
                 break;
             case MOVENETS_KEYS.RIGHT_KEY_CODE:
             case MOVENETS_KEYS.LEFT_KEY_CODE:
